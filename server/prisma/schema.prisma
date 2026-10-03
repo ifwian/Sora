@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tasks  Task[]
+  notes  Note[]
+  events Event[]
+
+  @@map("users")
+}
+
+model Task {
+  id                 String              @id @default(uuid())
+  title              String
+  description        String?
+  status             TaskStatus          @default(TODO)
+  priority           Priority            @default(MEDIUM)
+  category           String?
+  tags               String[]            @default([])
+  dueDate            DateTime?           @db.Date
+  dueTime            String?
+  recurringFrequency RecurringFrequency?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, dueDate])
+  @@index([userId, status])
+  @@map("tasks")
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @default("")
+  tags      String[] @default([])
+  pinned    Boolean  @default(false)
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, archived])
+  @@map("notes")
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  location    String?
+  category    String   @default("Event")
+  date        DateTime @db.Date
+  startTime   String?
+  endTime     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, date])
+  @@map("events")
+}

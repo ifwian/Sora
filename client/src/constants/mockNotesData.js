@@ -1,0 +1,48 @@
+/** MOCK DATA — Milestone 06 only, replaced by real API data in Milestone 11. */
+export const mockNotesData = [
+  {
+    id: 'note-1',
+    title: 'SQL Joins — cheat sheet',
+    content: 'INNER JOIN returns matching rows only.\nLEFT JOIN keeps all rows from the left table.\nRIGHT JOIN keeps all rows from the right table.\nFULL OUTER JOIN keeps everything.',
+    tags: ['sql', 'database'],
+    pinned: true,
+    archived: false,
+    updatedAt: Date.now() - 1000 * 60 * 60 * 2,
+  },
+  {
+    id: 'note-2',
+    title: 'Networking — OSI model',
+    content: 'Layer 3 (Network) handles routing and IP addressing.\nLayer 4 (Transport) handles TCP/UDP, ports, and reliability.',
+    tags: ['networking'],
+    pinned: false,
+    archived: false,
+    updatedAt: Date.now() - 1000 * 60 * 60 * 26,
+  },
+  {
+    id: 'note-3',
+    title: 'Project ideas',
+    content: 'Personal OS, a habit tracker widget, a small CLI tool for renaming files in bulk.',
+    tags: ['ideas'],
+    pinned: false,
+    archived: false,
+    updatedAt: Date.now() - 1000 * 60 * 60 * 48,
+  },
+  {
+    id: 'note-4',
+    title: 'OOP — inheritance vs composition',
+    content: 'Prefer composition over inheritance when behavior needs to change at runtime.',
+    tags: ['oop', 'exam'],
+    pinned: true,
+    archived: false,
+    updatedAt: Date.now() - 1000 * 60 * 60 * 5,
+  },
+  {
+    id: 'note-5',
+    title: 'Old apartment hunting notes',
+    content: 'Budget was around 8k/month, near the campus shuttle line.',
+    tags: ['personal'],
+    pinned: false,
+    archived: true,
+    updatedAt: Date.now() - 1000 * 60 * 60 * 24 * 40,
+  },
+]
