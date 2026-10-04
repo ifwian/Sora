@@ -1,31 +1,33 @@
-import { useState } from 'react'
 import { Card } from '../common/Card'
 import { Badge } from '../common/Badge'
 import { Checkbox } from '../common/Checkbox'
+import { LoadingState } from '../common/LoadingState'
 import { WidgetHeader } from './WidgetHeader'
+import { useTasks } from '../../hooks/useTasks'
+import { filterByView, sortTasks } from '../../utils/taskUtils'
+import { priorityBadgeVariant } from '../../constants/taskOptions'
+import { formatTime } from '../../utils/date'
 import { cn } from '../../utils/cn'
 
-const PRIORITY_VARIANT = {
-  URGENT: 'danger',
-  HIGH: 'danger',
-  MEDIUM: 'warning',
-  LOW: 'default',
-}
-
 /**
- * TasksWidget — today's tasks with a checkable completion state.
- * Toggling is local/in-memory only until Milestone 10 connects real tasks.
+ * TasksWidget — today's tasks, now reading from the real TasksContext
+ * (connected in Milestone 10) instead of dashboard-only mock data.
  */
-export function TasksWidget({ tasks }) {
-  const [localTasks, setLocalTasks] = useState(tasks)
+export function TasksWidget() {
+  const { tasks, loading, toggleComplete } = useTasks()
 
-  const toggleTask = (id) => {
-    setLocalTasks((current) =>
-      current.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task))
+  if (loading) {
+    return (
+      <Card>
+        <WidgetHeader title="Today's tasks" viewAllHref="/tasks" />
+        <LoadingState label="Loading tasks..." />
+      </Card>
     )
   }
 
-  if (localTasks.length === 0) {
+  const todaysTasks = sortTasks(filterByView(tasks, 'TODAY'), 'DUE_DATE')
+
+  if (todaysTasks.length === 0) {
     return (
       <Card>
         <WidgetHeader title="Today's tasks" viewAllHref="/tasks" />
@@ -38,26 +40,26 @@ export function TasksWidget({ tasks }) {
     <Card>
       <WidgetHeader title="Today's tasks" viewAllHref="/tasks" />
       <ul className="flex flex-col gap-3">
-        {localTasks.map((task) => (
+        {todaysTasks.map((task) => (
           <li key={task.id} className="flex items-center gap-3">
             <Checkbox
-              checked={task.completed}
-              onChange={() => toggleTask(task.id)}
-              label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
+              checked={task.status === 'COMPLETED'}
+              onChange={() => toggleComplete(task.id)}
+              label={`Mark "${task.title}" as ${task.status === 'COMPLETED' ? 'incomplete' : 'complete'}`}
             />
             <span
               className={cn(
                 'flex-1 text-sm text-foreground truncate',
-                task.completed && 'line-through text-muted'
+                task.status === 'COMPLETED' && 'line-through text-muted'
               )}
             >
               {task.title}
             </span>
-            {task.dueTime && !task.completed && (
-              <span className="text-xs text-muted shrink-0">{task.dueTime}</span>
+            {task.dueTime && task.status !== 'COMPLETED' && (
+              <span className="text-xs text-muted shrink-0">{formatTime(task.dueTime)}</span>
             )}
-            {!task.completed && (
-              <Badge variant={PRIORITY_VARIANT[task.priority] ?? 'default'} className="shrink-0">
+            {task.status !== 'COMPLETED' && (
+              <Badge variant={priorityBadgeVariant(task.priority)} className="shrink-0">
                 {task.priority}
               </Badge>
             )}

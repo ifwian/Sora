@@ -31,7 +31,7 @@ export function TaskItem({ task, onToggleComplete, onEdit, onDelete }) {
           >
             {task.title}
           </span>
-          {task.recurring && <Repeat size={12} className="text-muted shrink-0" />}
+          {task.recurringFrequency && <Repeat size={12} className="text-muted shrink-0" />}
         </div>
         {(dateLabel || task.tags?.length > 0) && (
           <div className="flex items-center gap-2 mt-1 flex-wrap">

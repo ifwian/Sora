@@ -5,6 +5,8 @@ import { Card } from '../components/common/Card'
 import { Modal } from '../components/common/Modal'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { EmptyState } from '../components/common/EmptyState'
+import { LoadingState } from '../components/common/LoadingState'
+import { ErrorState } from '../components/common/ErrorState'
 import { Tabs } from '../components/common/Tabs'
 import { TaskForm } from '../components/tasks/TaskForm'
 import { TaskItem } from '../components/tasks/TaskItem'
@@ -17,7 +19,7 @@ import { filterByView, applyFilters, sortTasks } from '../utils/taskUtils'
 const EMPTY_FILTERS = { search: '', priority: '', category: '', sortBy: 'DUE_DATE' }
 
 export function TasksPage() {
-  const { tasks, addTask, updateTask, deleteTask, toggleComplete } = useTasks()
+  const { tasks, loading, error, addTask, updateTask, deleteTask, toggleComplete, refetch } = useTasks()
   const { showToast } = useToast()
 
   const [view, setView] = useState('TODAY')
@@ -42,20 +44,29 @@ export function TasksPage() {
     setFormOpen(true)
   }
 
-  const handleSubmit = (data) => {
-    if (editingTask) {
-      updateTask(editingTask.id, data)
-      showToast({ message: 'Task updated.', variant: 'success' })
-    } else {
-      addTask(data)
-      showToast({ message: 'Task created.', variant: 'success' })
+  const handleSubmit = async (data) => {
+    try {
+      if (editingTask) {
+        await updateTask(editingTask.id, data)
+        showToast({ message: 'Task updated.', variant: 'success' })
+      } else {
+        await addTask(data)
+        showToast({ message: 'Task created.', variant: 'success' })
+      }
+      setFormOpen(false)
+    } catch {
+      // Error toast is already shown by TasksContext; keep the form open
+      // so the person doesn't lose what they typed.
     }
-    setFormOpen(false)
   }
 
-  const handleDeleteConfirmed = () => {
-    deleteTask(deletingTask.id)
-    showToast({ message: 'Task deleted.', variant: 'info' })
+  const handleDeleteConfirmed = async () => {
+    try {
+      await deleteTask(deletingTask.id)
+      showToast({ message: 'Task deleted.', variant: 'info' })
+    } catch {
+      // Error toast already shown by TasksContext.
+    }
   }
 
   return (
@@ -73,7 +84,11 @@ export function TasksPage() {
       <TaskFilters filters={filters} onChange={setFilters} />
 
       <Card padding="none">
-        {visibleTasks.length === 0 ? (
+        {loading ? (
+          <LoadingState label="Loading tasks..." />
+        ) : error ? (
+          <ErrorState message={error} onRetry={refetch} />
+        ) : visibleTasks.length === 0 ? (
           <EmptyState
             title="No tasks here."
             description="Try a different view, clear your filters, or create a new task."

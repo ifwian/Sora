@@ -1,17 +1,8 @@
 /**
- * MOCK DATA — Milestone 04 only.
- *
- * Every dashboard widget reads from here instead of hardcoding data
- * inline, so swapping this file for real API calls later (starting
- * with tasks in Milestone 10) doesn't require touching the widgets.
+ * MOCK DATA — Milestone 04 only, for widgets not yet connected to the
+ * backend. Tasks were removed from here in Milestone 10 — TasksWidget
+ * now reads from the real TasksContext instead.
  */
-
-export const mockTasks = [
-  { id: 't1', title: 'Finish SQL assignment', priority: 'HIGH', dueTime: '5:00 PM', completed: false },
-  { id: 't2', title: 'Read Chapter 4 — Data Structures', priority: 'MEDIUM', dueTime: '8:00 PM', completed: false },
-  { id: 't3', title: 'Push project commits', priority: 'LOW', dueTime: null, completed: true },
-  { id: 't4', title: 'Reply to group project thread', priority: 'MEDIUM', dueTime: '2:00 PM', completed: false },
-]
 
 export const mockUpcoming = [
   { id: 'u1', title: 'Database Management — Lab', type: 'Class', date: 'Today', time: '3:00 PM' },

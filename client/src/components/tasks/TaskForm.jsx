@@ -21,7 +21,7 @@ const EMPTY_TASK = {
   tags: [],
   dueDate: '',
   dueTime: '',
-  recurring: null,
+  recurringFrequency: null,
 }
 
 /**
@@ -116,18 +116,16 @@ export function TaskForm({ task, onSubmit, onCancel }) {
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Checkbox
-            checked={Boolean(form.recurring)}
-            onChange={(checked) =>
-              update('recurring', checked ? { frequency: 'WEEKLY' } : null)
-            }
+            checked={Boolean(form.recurringFrequency)}
+            onChange={(checked) => update('recurringFrequency', checked ? 'WEEKLY' : null)}
             label="Repeat this task"
           />
           <span className="text-sm text-foreground">Repeat this task</span>
         </div>
-        {form.recurring && (
+        {form.recurringFrequency && (
           <Select
-            value={form.recurring.frequency}
-            onChange={(event) => update('recurring', { frequency: event.target.value })}
+            value={form.recurringFrequency}
+            onChange={(event) => update('recurringFrequency', event.target.value)}
             options={RECURRING_FREQUENCY_OPTIONS}
           />
         )}
