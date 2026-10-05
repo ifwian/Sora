@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { getTasks, createTask, updateTask, deleteTask } from '../controllers/task.controller.js'
-import { validateBody, createTaskSchema, updateTaskSchema } from '../validators/task.validator.js'
+import { createTaskSchema, updateTaskSchema } from '../validators/task.validator.js'
+import { validateBody } from '../middleware/validate.js'
 
 const router = Router()
 

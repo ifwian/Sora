@@ -4,6 +4,8 @@ import { Button } from '../components/common/Button'
 import { Modal } from '../components/common/Modal'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { EmptyState } from '../components/common/EmptyState'
+import { LoadingState } from '../components/common/LoadingState'
+import { ErrorState } from '../components/common/ErrorState'
 import { Tabs } from '../components/common/Tabs'
 import { NoteCard } from '../components/notes/NoteCard'
 import { NoteForm } from '../components/notes/NoteForm'
@@ -16,7 +18,8 @@ const VIEW_OPTIONS = [
 ]
 
 export function NotesPage() {
-  const { notes, addNote, updateNote, deleteNote, togglePin, toggleArchive } = useNotes()
+  const { notes, loading, error, addNote, updateNote, deleteNote, togglePin, toggleArchive, refetch } =
+    useNotes()
   const { showToast } = useToast()
 
   const [view, setView] = useState('ACTIVE')
@@ -36,7 +39,7 @@ export function NotesPage() {
       : byView
     return [...filtered].sort((a, b) => {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
-      return b.updatedAt - a.updatedAt
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     })
   }, [notes, view, search])
 
@@ -50,20 +53,28 @@ export function NotesPage() {
     setFormOpen(true)
   }
 
-  const handleSubmit = (data) => {
-    if (editingNote) {
-      updateNote(editingNote.id, data)
-      showToast({ message: 'Note updated.', variant: 'success' })
-    } else {
-      addNote(data)
-      showToast({ message: 'Note created.', variant: 'success' })
+  const handleSubmit = async (data) => {
+    try {
+      if (editingNote) {
+        await updateNote(editingNote.id, data)
+        showToast({ message: 'Note updated.', variant: 'success' })
+      } else {
+        await addNote(data)
+        showToast({ message: 'Note created.', variant: 'success' })
+      }
+      setFormOpen(false)
+    } catch {
+      // Error toast already shown by NotesContext; keep the form open.
     }
-    setFormOpen(false)
   }
 
-  const handleDeleteConfirmed = () => {
-    deleteNote(deletingNote.id)
-    showToast({ message: 'Note deleted.', variant: 'info' })
+  const handleDeleteConfirmed = async () => {
+    try {
+      await deleteNote(deletingNote.id)
+      showToast({ message: 'Note deleted.', variant: 'info' })
+    } catch {
+      // Error toast already shown by NotesContext.
+    }
   }
 
   return (
@@ -90,7 +101,11 @@ export function NotesPage() {
         </label>
       </div>
 
-      {visibleNotes.length === 0 ? (
+      {loading ? (
+        <LoadingState label="Loading notes..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={refetch} />
+      ) : visibleNotes.length === 0 ? (
         <EmptyState
           title={view === 'ARCHIVED' ? 'No archived notes.' : 'No notes yet.'}
           description={

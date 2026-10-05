@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { ApiError } from '../utils/ApiError.js'
 
 const STATUS_VALUES = ['TODO', 'IN_PROGRESS', 'COMPLETED']
 const PRIORITY_VALUES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT']
@@ -22,18 +21,4 @@ const baseTaskFields = {
 }
 
 export const createTaskSchema = z.object(baseTaskFields)
-
 export const updateTaskSchema = z.object(baseTaskFields).partial()
-
-/** validateBody — generic middleware factory: validates req.body against a zod schema. */
-export function validateBody(schema) {
-  return (req, res, next) => {
-    const result = schema.safeParse(req.body)
-    if (!result.success) {
-      const message = result.error.issues.map((issue) => issue.message).join(', ')
-      return next(new ApiError(400, message))
-    }
-    req.body = result.data
-    next()
-  }
-}

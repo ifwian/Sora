@@ -1,6 +1,11 @@
 import { prisma } from '../config/prisma.js'
 import { ApiError } from '../utils/ApiError.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
+import { toDateOnly } from '../utils/serializeDate.js'
+
+function serializeTask(task) {
+  return { ...task, dueDate: toDateOnly(task.dueDate) }
+}
 
 /** GET /api/tasks — all tasks belonging to the current user. */
 export const getTasks = asyncHandler(async (req, res) => {
@@ -8,7 +13,7 @@ export const getTasks = asyncHandler(async (req, res) => {
     where: { userId: req.userId },
     orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
   })
-  res.json({ success: true, data: tasks })
+  res.json({ success: true, data: tasks.map(serializeTask) })
 })
 
 /** POST /api/tasks — create a task for the current user. */
@@ -16,7 +21,7 @@ export const createTask = asyncHandler(async (req, res) => {
   const task = await prisma.task.create({
     data: { ...req.body, userId: req.userId },
   })
-  res.status(201).json({ success: true, data: task })
+  res.status(201).json({ success: true, data: serializeTask(task) })
 })
 
 /** Shared helper — loads a task and throws 404 if missing or not owned by this user. */
@@ -35,7 +40,7 @@ export const updateTask = asyncHandler(async (req, res) => {
     where: { id: req.params.id },
     data: req.body,
   })
-  res.json({ success: true, data: task })
+  res.json({ success: true, data: serializeTask(task) })
 })
 
 /** DELETE /api/tasks/:id — delete a task. */

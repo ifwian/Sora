@@ -4,14 +4,14 @@ import { Badge } from '../common/Badge'
 import { cn } from '../../utils/cn'
 
 function relativeTime(timestamp) {
-  const diffMs = Date.now() - timestamp
+  const diffMs = Date.now() - new Date(timestamp).getTime()
   const hours = Math.floor(diffMs / (1000 * 60 * 60))
   if (hours < 1) return 'Just now'
   if (hours < 24) return `${hours}h ago`
   const days = Math.floor(hours / 24)
   if (days === 1) return 'Yesterday'
   if (days < 7) return `${days}d ago`
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(timestamp)
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(timestamp))
 }
 
 /**

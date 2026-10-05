@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react'
+import { Trash2 } from 'lucide-react'
 import { Modal } from '../components/common/Modal'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { Button } from '../components/common/Button'
+import { LoadingState } from '../components/common/LoadingState'
+import { ErrorState } from '../components/common/ErrorState'
 import { CalendarToolbar } from '../components/calendar/CalendarToolbar'
 import { MonthView } from '../components/calendar/MonthView'
 import { WeekView } from '../components/calendar/WeekView'
@@ -10,7 +13,6 @@ import { EventForm } from '../components/calendar/EventForm'
 import { useEvents } from '../hooks/useEvents'
 import { useTasks } from '../hooks/useTasks'
 import { useToast } from '../hooks/useToast'
-import { Trash2 } from 'lucide-react'
 import {
   addDays,
   addMonths,
@@ -21,7 +23,7 @@ import {
 import { todayISO } from '../utils/date'
 
 export function CalendarPage() {
-  const { events, addEvent, updateEvent, deleteEvent } = useEvents()
+  const { events, loading, error, addEvent, updateEvent, deleteEvent, refetch } = useEvents()
   const { tasks } = useTasks()
   const { showToast } = useToast()
 
@@ -60,21 +62,29 @@ export function CalendarPage() {
     if (view === 'MONTH') setView('DAY')
   }
 
-  const handleSubmit = (data) => {
-    if (editingEvent) {
-      updateEvent(editingEvent.id, data)
-      showToast({ message: 'Event updated.', variant: 'success' })
-    } else {
-      addEvent(data)
-      showToast({ message: 'Event created.', variant: 'success' })
+  const handleSubmit = async (data) => {
+    try {
+      if (editingEvent) {
+        await updateEvent(editingEvent.id, data)
+        showToast({ message: 'Event updated.', variant: 'success' })
+      } else {
+        await addEvent(data)
+        showToast({ message: 'Event created.', variant: 'success' })
+      }
+      setFormOpen(false)
+    } catch {
+      // Error toast already shown by EventsContext; keep the form open.
     }
-    setFormOpen(false)
   }
 
-  const handleDeleteConfirmed = () => {
-    deleteEvent(deletingEvent.id)
-    showToast({ message: 'Event deleted.', variant: 'info' })
-    setFormOpen(false)
+  const handleDeleteConfirmed = async () => {
+    try {
+      await deleteEvent(deletingEvent.id)
+      showToast({ message: 'Event deleted.', variant: 'info' })
+      setFormOpen(false)
+    } catch {
+      // Error toast already shown by EventsContext.
+    }
   }
 
   return (
@@ -91,32 +101,40 @@ export function CalendarPage() {
         onCreate={() => openCreate(anchorDate)}
       />
 
-      {view === 'MONTH' && (
-        <MonthView
-          anchorDate={anchorDate}
-          events={events}
-          tasks={tasks}
-          onDayClick={handleDayClick}
-          onItemClick={openEdit}
-        />
-      )}
-      {view === 'WEEK' && (
-        <WeekView
-          anchorDate={anchorDate}
-          events={events}
-          tasks={tasks}
-          onDayClick={handleDayClick}
-          onItemClick={openEdit}
-        />
-      )}
-      {view === 'DAY' && (
-        <DayView
-          anchorDate={anchorDate}
-          events={events}
-          tasks={tasks}
-          onCreate={() => openCreate(anchorDate)}
-          onItemClick={openEdit}
-        />
+      {loading ? (
+        <LoadingState label="Loading calendar..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={refetch} />
+      ) : (
+        <>
+          {view === 'MONTH' && (
+            <MonthView
+              anchorDate={anchorDate}
+              events={events}
+              tasks={tasks}
+              onDayClick={handleDayClick}
+              onItemClick={openEdit}
+            />
+          )}
+          {view === 'WEEK' && (
+            <WeekView
+              anchorDate={anchorDate}
+              events={events}
+              tasks={tasks}
+              onDayClick={handleDayClick}
+              onItemClick={openEdit}
+            />
+          )}
+          {view === 'DAY' && (
+            <DayView
+              anchorDate={anchorDate}
+              events={events}
+              tasks={tasks}
+              onCreate={() => openCreate(anchorDate)}
+              onItemClick={openEdit}
+            />
+          )}
+        </>
       )}
 
       <Modal

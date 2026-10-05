@@ -5,7 +5,7 @@ import { UpcomingWidget } from '../components/dashboard/UpcomingWidget'
 import { HabitsWidget } from '../components/dashboard/HabitsWidget'
 import { GoalsWidget } from '../components/dashboard/GoalsWidget'
 import { RecentNotesWidget } from '../components/dashboard/RecentNotesWidget'
-import { mockUpcoming, mockHabits, mockGoals, mockNotes } from '../constants/mockDashboardData'
+import { mockHabits, mockGoals } from '../constants/mockDashboardData'
 
 export function DashboardPage() {
   return (
@@ -19,10 +19,10 @@ export function DashboardPage() {
         <div className="md:col-span-2">
           <TasksWidget />
         </div>
-        <UpcomingWidget items={mockUpcoming} />
+        <UpcomingWidget />
         <HabitsWidget habits={mockHabits} />
         <GoalsWidget goals={mockGoals} />
-        <RecentNotesWidget notes={mockNotes} />
+        <RecentNotesWidget />
       </div>
     </div>
   )

@@ -1,19 +1,34 @@
 import { Card } from '../common/Card'
 import { Badge } from '../common/Badge'
+import { LoadingState } from '../common/LoadingState'
 import { WidgetHeader } from './WidgetHeader'
-
-const TYPE_VARIANT = {
-  Exam: 'danger',
-  Deadline: 'warning',
-  Class: 'default',
-  Event: 'accent',
-}
+import { useEvents } from '../../hooks/useEvents'
+import { eventBadgeVariant } from '../../constants/eventOptions'
+import { formatShortDate, formatTime, todayISO } from '../../utils/date'
 
 /**
- * UpcomingWidget — upcoming events, deadlines, and exams.
+ * UpcomingWidget — upcoming events, reading from the real EventsContext
+ * (connected in Milestone 12).
  */
-export function UpcomingWidget({ items }) {
-  if (items.length === 0) {
+export function UpcomingWidget() {
+  const { events, loading } = useEvents()
+
+  if (loading) {
+    return (
+      <Card>
+        <WidgetHeader title="Upcoming" viewAllHref="/calendar" />
+        <LoadingState label="Loading events..." />
+      </Card>
+    )
+  }
+
+  const today = todayISO()
+  const upcoming = [...events]
+    .filter((event) => event.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.startTime ?? '').localeCompare(b.startTime ?? ''))
+    .slice(0, 5)
+
+  if (upcoming.length === 0) {
     return (
       <Card>
         <WidgetHeader title="Upcoming" viewAllHref="/calendar" />
@@ -26,16 +41,17 @@ export function UpcomingWidget({ items }) {
     <Card>
       <WidgetHeader title="Upcoming" viewAllHref="/calendar" />
       <ul className="flex flex-col gap-3">
-        {items.map((item) => (
-          <li key={item.id} className="flex items-start justify-between gap-3">
+        {upcoming.map((event) => (
+          <li key={event.id} className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm text-foreground truncate">{item.title}</p>
+              <p className="text-sm text-foreground truncate">{event.title}</p>
               <p className="text-xs text-muted mt-0.5">
-                {item.date} · {item.time}
+                {event.date === today ? 'Today' : formatShortDate(event.date)}
+                {event.startTime ? ` · ${formatTime(event.startTime)}` : ''}
               </p>
             </div>
-            <Badge variant={TYPE_VARIANT[item.type] ?? 'default'} className="shrink-0">
-              {item.type}
+            <Badge variant={eventBadgeVariant(event.category)} className="shrink-0">
+              {event.category}
             </Badge>
           </li>
         ))}

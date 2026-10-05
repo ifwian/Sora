@@ -41,7 +41,7 @@ export function sortTasks(tasks, sortBy) {
     case 'PRIORITY':
       return sorted.sort((a, b) => PRIORITY_WEIGHT[a.priority] - PRIORITY_WEIGHT[b.priority])
     case 'NEWEST':
-      return sorted.sort((a, b) => b.createdAt - a.createdAt)
+      return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     case 'DUE_DATE':
     default:
       return sorted.sort((a, b) => {
