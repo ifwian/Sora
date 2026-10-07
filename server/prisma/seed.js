@@ -12,7 +12,7 @@ async function main() {
     where: { email: 'demo@personalos.dev' },
     update: {},
     create: {
-      id: 'demo-user-0001', // fixed id — see config/constants.js DEMO_USER_ID
+      id: 'demo-user-0001', // fixed id for easy reference while testing
       email: 'demo@personalos.dev',
       passwordHash,
       name: 'Demo User',

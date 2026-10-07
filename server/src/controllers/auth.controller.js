@@ -1,0 +1,68 @@
+import bcrypt from 'bcrypt'
+import { prisma } from '../config/prisma.js'
+import { ApiError } from '../utils/ApiError.js'
+import { asyncHandler } from '../utils/asyncHandler.js'
+import { signToken } from '../utils/jwt.js'
+
+const SALT_ROUNDS = 10
+
+function serializeUser(user) {
+  return { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt }
+}
+
+/** POST /api/auth/register */
+export const register = asyncHandler(async (req, res) => {
+  const { email, password, name } = req.body
+
+  const existing = await prisma.user.findUnique({ where: { email } })
+  if (existing) {
+    throw new ApiError(409, 'An account with that email already exists')
+  }
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS)
+  const user = await prisma.user.create({ data: { email, passwordHash, name } })
+
+  const token = signToken(user.id)
+  res.status(201).json({ success: true, data: { user: serializeUser(user), token } })
+})
+
+/** POST /api/auth/login */
+export const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body
+
+  const user = await prisma.user.findUnique({ where: { email } })
+  // Same generic message whether the email doesn't exist or the password
+  // is wrong — never reveal which one it was.
+  const invalidCredentials = () => new ApiError(401, 'Invalid email or password')
+
+  if (!user) throw invalidCredentials()
+
+  const passwordMatches = await bcrypt.compare(password, user.passwordHash)
+  if (!passwordMatches) throw invalidCredentials()
+
+  const token = signToken(user.id)
+  res.json({ success: true, data: { user: serializeUser(user), token } })
+})
+
+/** GET /api/auth/me — requires auth */
+export const getMe = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.userId } })
+  if (!user) throw new ApiError(401, 'Invalid or expired session')
+  res.json({ success: true, data: serializeUser(user) })
+})
+
+/** PATCH /api/auth/change-password — requires auth */
+export const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body
+
+  const user = await prisma.user.findUnique({ where: { id: req.userId } })
+  if (!user) throw new ApiError(401, 'Invalid or expired session')
+
+  const passwordMatches = await bcrypt.compare(currentPassword, user.passwordHash)
+  if (!passwordMatches) throw new ApiError(400, 'Current password is incorrect')
+
+  const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS)
+  await prisma.user.update({ where: { id: req.userId }, data: { passwordHash } })
+
+  res.json({ success: true, data: null })
+})

@@ -4,7 +4,6 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import { env } from './config/env.js'
 import { apiLimiter } from './middleware/rateLimiter.js'
-import { tempUser } from './middleware/tempUser.js'
 import { notFound, errorHandler } from './middleware/errorHandler.js'
 import routes from './routes/index.js'
 
@@ -24,9 +23,6 @@ app.use(morgan(env.isProduction ? 'combined' : 'dev'))
 
 // General rate limit across the whole API
 app.use('/api', apiLimiter)
-
-// TEMPORARY — see middleware/tempUser.js. Replaced by real auth in Milestone 13.
-app.use('/api', tempUser)
 
 // Routes
 app.use('/api', routes)

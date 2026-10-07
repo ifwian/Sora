@@ -1,3 +1,5 @@
+import { AUTH_TOKEN_KEY } from '../constants/auth'
+
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
 /**
@@ -12,19 +14,31 @@ export class ApiRequestError extends Error {
 }
 
 /**
- * request — shared fetch wrapper. Every API call goes through this,
- * so JSON parsing, error handling, and the base URL live in one place.
+ * request — shared fetch wrapper. Every API call goes through this, so
+ * JSON parsing, the base URL, the auth header, and 401 handling all
+ * live in one place.
  */
 async function request(path, options = {}) {
+  const token = localStorage.getItem(AUTH_TOKEN_KEY)
+
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   })
 
   const body = await response.json().catch(() => null)
+
+  if (response.status === 401 && token) {
+    // The session is invalid/expired — clear it and let AuthContext know,
+    // so the person gets redirected to log in again instead of seeing
+    // confusing errors on every subsequent request.
+    localStorage.removeItem(AUTH_TOKEN_KEY)
+    window.dispatchEvent(new Event('auth:logout'))
+  }
 
   if (!response.ok || !body?.success) {
     throw new ApiRequestError(body?.message ?? 'Something went wrong. Please try again.', response.status)

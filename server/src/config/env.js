@@ -18,5 +18,7 @@ export const env = {
   nodeEnv: requireEnv('NODE_ENV', 'development'),
   clientOrigin: requireEnv('CLIENT_ORIGIN', 'http://localhost:5173'),
   databaseUrl: requireEnv('DATABASE_URL'),
+  jwtSecret: requireEnv('JWT_SECRET'),
+  jwtExpiresIn: requireEnv('JWT_EXPIRES_IN', '7d'),
   isProduction: process.env.NODE_ENV === 'production',
 }
