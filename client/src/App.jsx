@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import { TasksProvider } from './context/TasksContext'
 import { NotesProvider } from './context/NotesContext'
 import { EventsProvider } from './context/EventsContext'
+import { HabitsProvider } from './context/HabitsContext'
+import { GoalsProvider } from './context/GoalsContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AppLayout } from './layouts/AppLayout'
 import { LoginPage } from './pages/LoginPage'
@@ -29,7 +31,11 @@ function DataProviders() {
     <TasksProvider>
       <NotesProvider>
         <EventsProvider>
-          <Outlet />
+          <HabitsProvider>
+            <GoalsProvider>
+              <Outlet />
+            </GoalsProvider>
+          </HabitsProvider>
         </EventsProvider>
       </NotesProvider>
     </TasksProvider>

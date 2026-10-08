@@ -34,11 +34,73 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tasks  Task[]
-  notes  Note[]
-  events Event[]
+  tasks   Task[]
+  notes   Note[]
+  events  Event[]
+  habits  Habit[]
+  goals   Goal[]
 
   @@map("users")
+}
+
+model Habit {
+  id        String   @id @default(uuid())
+  name      String
+  category  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions HabitCompletion[]
+
+  @@index([userId])
+  @@map("habits")
+}
+
+model HabitCompletion {
+  id        String   @id @default(uuid())
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+
+  habitId String
+  habit   Habit  @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+  @@map("habit_completions")
+}
+
+model Goal {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  category    String?
+  deadline    DateTime? @db.Date
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId     String
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  milestones GoalMilestone[]
+
+  @@index([userId])
+  @@map("goals")
+}
+
+model GoalMilestone {
+  id        String   @id @default(uuid())
+  title     String
+  completed Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  goalId String
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@map("goal_milestones")
 }
 
 model Task {
