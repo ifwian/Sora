@@ -20,6 +20,11 @@ enum Priority {
   URGENT
 }
 
+enum AssignmentKind {
+  ASSIGNMENT
+  EXAM
+}
+
 enum RecurringFrequency {
   DAILY
   WEEKLY
@@ -39,6 +44,13 @@ model User {
   events  Event[]
   habits  Habit[]
   goals   Goal[]
+
+  subjects      Subject[]
+  assignments   Assignment[]
+  studySessions StudySession[]
+  grades        Grade[]
+  expenses      Expense[]
+  budgets       Budget[]
 
   @@map("users")
 }
@@ -162,4 +174,101 @@ model Event {
   @@index([userId])
   @@index([userId, date])
   @@map("events")
+}
+
+model Subject {
+  id        String   @id @default(uuid())
+  name      String
+  code      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments   Assignment[]
+  studySessions StudySession[]
+  grades        Grade[]
+
+  @@index([userId])
+  @@map("subjects")
+}
+
+model Assignment {
+  id        String         @id @default(uuid())
+  title     String
+  kind      AssignmentKind @default(ASSIGNMENT)
+  dueDate   DateTime       @db.Date
+  completed Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dueDate])
+  @@map("assignments")
+}
+
+model StudySession {
+  id        String   @id @default(uuid())
+  date      DateTime @db.Date
+  minutes   Int
+  notes     String?
+  createdAt DateTime @default(now())
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@map("study_sessions")
+}
+
+model Grade {
+  id        String   @id @default(uuid())
+  title     String
+  score     Float
+  maxScore  Float    @default(100)
+  createdAt DateTime @default(now())
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("grades")
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  amount      Decimal  @db.Decimal(12, 2)
+  category    String
+  description String?
+  date        DateTime @db.Date
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@map("expenses")
+}
+
+model Budget {
+  id        String   @id @default(uuid())
+  month     String
+  amount    Decimal  @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month])
+  @@map("budgets")
 }

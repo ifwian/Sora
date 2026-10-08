@@ -5,6 +5,8 @@ import { UpcomingWidget } from '../components/dashboard/UpcomingWidget'
 import { HabitsWidget } from '../components/dashboard/HabitsWidget'
 import { GoalsWidget } from '../components/dashboard/GoalsWidget'
 import { RecentNotesWidget } from '../components/dashboard/RecentNotesWidget'
+import { StudyWidget } from '../components/dashboard/StudyWidget'
+import { FinanceWidget } from '../components/dashboard/FinanceWidget'
 
 export function DashboardPage() {
   return (
@@ -22,6 +24,8 @@ export function DashboardPage() {
         <HabitsWidget />
         <GoalsWidget />
         <RecentNotesWidget />
+        <StudyWidget />
+        <FinanceWidget />
       </div>
     </div>
   )

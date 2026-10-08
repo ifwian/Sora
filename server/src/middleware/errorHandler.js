@@ -13,6 +13,11 @@ export function notFound(req, res, next) {
  */
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, req, res, next) {
+  // Prisma unique-constraint violation (e.g. a second budget for the same month)
+  if (err.code === 'P2002') {
+    err = new ApiError(409, 'That already exists')
+  }
+
   const statusCode = err.statusCode ?? 500
   const message = err.isOperational ? err.message : 'Something went wrong. Please try again.'
 

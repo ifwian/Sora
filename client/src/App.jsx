@@ -4,6 +4,8 @@ import { NotesProvider } from './context/NotesContext'
 import { EventsProvider } from './context/EventsContext'
 import { HabitsProvider } from './context/HabitsContext'
 import { GoalsProvider } from './context/GoalsContext'
+import { StudyProvider } from './context/StudyContext'
+import { FinanceProvider } from './context/FinanceContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AppLayout } from './layouts/AppLayout'
 import { LoginPage } from './pages/LoginPage'
@@ -33,7 +35,11 @@ function DataProviders() {
         <EventsProvider>
           <HabitsProvider>
             <GoalsProvider>
-              <Outlet />
+              <StudyProvider>
+                <FinanceProvider>
+                  <Outlet />
+                </FinanceProvider>
+              </StudyProvider>
             </GoalsProvider>
           </HabitsProvider>
         </EventsProvider>
