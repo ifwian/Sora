@@ -10,6 +10,7 @@ import studyRoutes from './study.routes.js'
 import financeRoutes from './finance.routes.js'
 import libraryRoutes from './library.routes.js'
 import { memoryRouter, placeRouter } from './memory.routes.js'
+import searchRoutes from './search.routes.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 
 const router = Router()
@@ -29,6 +30,7 @@ router.use('/finance', requireAuth, financeRoutes)
 router.use('/library', requireAuth, libraryRoutes)
 router.use('/memories', requireAuth, memoryRouter)
 router.use('/places', requireAuth, placeRouter)
+router.use('/search', requireAuth, searchRoutes)
 
 // Remaining feature routes (study, finance, ...) get mounted here,
 // protected the same way, as each module connects to the backend.

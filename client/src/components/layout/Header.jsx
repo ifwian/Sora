@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Menu, LogOut } from 'lucide-react'
+import { Menu, LogOut } from 'lucide-react'
 import { ThemeToggle } from '../common/ThemeToggle'
+import { SearchBar } from './SearchBar'
 import { useAuth } from '../../hooks/useAuth'
 
 function initialsFor(user) {
@@ -11,7 +12,6 @@ function initialsFor(user) {
 
 /**
  * Header — top bar with global search, theme toggle, and profile menu.
- * The search input is visual-only for now; wired up in Milestone 20.
  */
 export function Header({ onOpenMobileNav }) {
   const { user, logout } = useAuth()
@@ -35,14 +35,7 @@ export function Header({ onOpenMobileNav }) {
       </button>
 
       <div className="flex-1 max-w-md">
-        <label className="relative flex items-center">
-          <Search size={15} className="absolute left-3 text-muted pointer-events-none" />
-          <input
-            type="search"
-            placeholder="Search everything..."
-            className="h-9 w-full pl-9 pr-3 rounded-sm bg-surface border border-border text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          />
-        </label>
+        <SearchBar />
       </div>
 
       <div className="flex items-center gap-3">
