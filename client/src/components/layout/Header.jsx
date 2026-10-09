@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Menu, LogOut } from 'lucide-react'
 import { ThemeToggle } from '../common/ThemeToggle'
 import { SearchBar } from './SearchBar'
+import { NotificationBell } from './NotificationBell'
 import { useAuth } from '../../hooks/useAuth'
 
 function initialsFor(user) {
@@ -40,6 +41,7 @@ export function Header({ onOpenMobileNav }) {
 
       <div className="flex items-center gap-3">
         <ThemeToggle />
+        <NotificationBell />
 
         <div className="relative">
           <button
