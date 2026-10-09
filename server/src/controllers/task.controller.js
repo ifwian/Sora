@@ -18,8 +18,9 @@ export const getTasks = asyncHandler(async (req, res) => {
 
 /** POST /api/tasks — create a task for the current user. */
 export const createTask = asyncHandler(async (req, res) => {
+  const completedAt = req.body.status === 'COMPLETED' ? new Date() : null
   const task = await prisma.task.create({
-    data: { ...req.body, userId: req.userId },
+    data: { ...req.body, completedAt, userId: req.userId },
   })
   res.status(201).json({ success: true, data: serializeTask(task) })
 })
@@ -35,10 +36,18 @@ async function findOwnedTask(id, userId) {
 
 /** PATCH /api/tasks/:id — update a task. */
 export const updateTask = asyncHandler(async (req, res) => {
-  await findOwnedTask(req.params.id, req.userId)
+  const existing = await findOwnedTask(req.params.id, req.userId)
+
+  // completedAt is server-controlled: set the first time a task becomes
+  // COMPLETED, kept if it stays completed, cleared if it's reopened.
+  const data = { ...req.body }
+  if (req.body.status !== undefined) {
+    data.completedAt = req.body.status === 'COMPLETED' ? (existing.completedAt ?? new Date()) : null
+  }
+
   const task = await prisma.task.update({
     where: { id: req.params.id },
-    data: req.body,
+    data,
   })
   res.json({ success: true, data: serializeTask(task) })
 })

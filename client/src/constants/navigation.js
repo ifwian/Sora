@@ -13,6 +13,7 @@ import {
   Image,
   MapPin,
   Settings,
+  BarChart3,
 } from 'lucide-react'
 
 /**
@@ -39,6 +40,7 @@ export const NAV_SECTIONS = [
       { to: '/habits', label: 'Habits', icon: Flame },
       { to: '/study', label: 'Study', icon: GraduationCap },
       { to: '/finance', label: 'Finance', icon: Wallet },
+      { to: '/analytics', label: 'Analytics', icon: BarChart3 },
     ],
   },
   {

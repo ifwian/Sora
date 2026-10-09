@@ -1,5 +1,5 @@
-import { addDays } from './calendar'
-import { todayISO } from './date'
+import { addDays } from './calendar.js'
+import { todayISO } from './date.js'
 
 /** Consecutive days completed, counting back from today (or yesterday if today isn't done yet). */
 export function calculateStreak(completedDates) {

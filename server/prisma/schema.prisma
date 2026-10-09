@@ -150,6 +150,7 @@ model Task {
   dueDate            DateTime?           @db.Date
   dueTime            String?
   recurringFrequency RecurringFrequency?
+  completedAt        DateTime?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
