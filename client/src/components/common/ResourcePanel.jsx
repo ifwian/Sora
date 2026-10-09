@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from './Button'
 import { Card } from './Card'
@@ -22,6 +22,7 @@ export function ResourcePanel({
   renderItem,
   disabledReason,
   emptyDescription,
+  groupBy,
 }) {
   const { items, loading, error, add, update, remove, refetch } = resource
   const { showToast } = useToast()
@@ -78,30 +79,41 @@ export function ResourcePanel({
           />
         ) : (
           <ul className="px-4">
-            {items.map((item) => (
-              <li key={item.id} className="flex items-center gap-3 py-3 border-b border-border last:border-0">
-                <div className="flex-1 min-w-0">{renderItem(item, { update })}</div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditing(item)
-                    setFormOpen(true)
-                  }}
-                  aria-label={`Edit ${entity.toLowerCase()}`}
-                  className="text-muted hover:text-foreground rounded-sm p-1.5"
-                >
-                  <Pencil size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDeleting(item)}
-                  aria-label={`Delete ${entity.toLowerCase()}`}
-                  className="text-muted hover:text-danger rounded-sm p-1.5"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </li>
-            ))}
+            {items.map((item, index) => {
+              const group = groupBy?.(item)
+              const showHeader = group && (index === 0 || groupBy(items[index - 1]) !== group)
+              return (
+                <Fragment key={item.id}>
+                  {showHeader && (
+                    <li className="pt-4 pb-1 text-xs font-medium uppercase tracking-wide text-muted border-b border-border">
+                      {group}
+                    </li>
+                  )}
+                  <li className="flex items-center gap-3 py-3 border-b border-border last:border-0">
+                    <div className="flex-1 min-w-0">{renderItem(item, { update })}</div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditing(item)
+                        setFormOpen(true)
+                      }}
+                      aria-label={`Edit ${entity.toLowerCase()}`}
+                      className="text-muted hover:text-foreground rounded-sm p-1.5"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeleting(item)}
+                      aria-label={`Delete ${entity.toLowerCase()}`}
+                      className="text-muted hover:text-danger rounded-sm p-1.5"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </li>
+                </Fragment>
+              )
+            })}
           </ul>
         )}
       </Card>

@@ -4,19 +4,27 @@ import { Textarea } from './Textarea'
 import { Select } from './Select'
 import { Button } from './Button'
 
+const LIST_SEPARATOR = { ',': ', ', '\n': '\n' }
+
 function toFormValues(fields, initial) {
   const values = {}
   for (const field of fields) {
     const raw = initial?.[field.name]
-    values[field.name] = raw === null || raw === undefined ? '' : String(raw)
+    if (field.type === 'list') {
+      values[field.name] = Array.isArray(raw) ? raw.join(LIST_SEPARATOR[field.separator ?? ',']) : ''
+    } else {
+      values[field.name] = raw === null || raw === undefined ? '' : String(raw)
+    }
   }
   return values
 }
 
 /**
  * FieldsForm — a small config-driven form. Each field:
- *  { name, label, type: 'text'|'number'|'date'|'select'|'textarea', required,
- *    options (for select), nullable (send null when cleared), placeholder, step }
+ *  { name, label, type: 'text'|'number'|'date'|'select'|'textarea'|'list', required,
+ *    options (for select), numeric (select sends a number), nullable (send null
+ *    when cleared), placeholder, helperText, step,
+ *    separator (for 'list': ',' or '\n' — always sends an array, [] when empty) }
  * Empty optional fields are omitted from the payload unless `nullable` is set,
  * in which case they're sent as null so a value can be cleared when editing.
  */
@@ -37,12 +45,20 @@ export function FieldsForm({ fields, initial, onSubmit, onCancel, submitLabel = 
 
     for (const field of fields) {
       const raw = values[field.name].trim()
+      if (field.type === 'list') {
+        const separator = field.separator ?? ','
+        payload[field.name] = raw
+          .split(separator === ',' ? ',' : /\r?\n/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+        continue
+      }
       if (raw === '') {
         if (field.required) nextErrors[field.name] = `${field.label} is required.`
         else if (field.nullable) payload[field.name] = null
         continue
       }
-      if (field.type === 'number') {
+      if (field.type === 'number' || (field.type === 'select' && field.numeric)) {
         const number = Number(raw)
         if (Number.isNaN(number)) nextErrors[field.name] = `${field.label} must be a number.`
         else payload[field.name] = number
@@ -87,13 +103,14 @@ export function FieldsForm({ fields, initial, onSubmit, onCancel, submitLabel = 
             />
           )
         }
-        if (field.type === 'textarea') {
+        if (field.type === 'textarea' || field.type === 'list') {
           return (
             <Textarea
               key={field.name}
               {...common}
-              rows={3}
+              rows={field.type === 'list' && field.separator === ',' ? 2 : 3}
               placeholder={field.placeholder}
+              helperText={field.helperText}
               onChange={(e) => setValue(field.name, e.target.value)}
             />
           )

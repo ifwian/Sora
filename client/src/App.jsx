@@ -6,6 +6,8 @@ import { HabitsProvider } from './context/HabitsContext'
 import { GoalsProvider } from './context/GoalsContext'
 import { StudyProvider } from './context/StudyContext'
 import { FinanceProvider } from './context/FinanceContext'
+import { LibraryProvider } from './context/LibraryContext'
+import { MemoriesProvider } from './context/MemoriesContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AppLayout } from './layouts/AppLayout'
 import { LoginPage } from './pages/LoginPage'
@@ -37,7 +39,11 @@ function DataProviders() {
             <GoalsProvider>
               <StudyProvider>
                 <FinanceProvider>
-                  <Outlet />
+                  <LibraryProvider>
+                    <MemoriesProvider>
+                      <Outlet />
+                    </MemoriesProvider>
+                  </LibraryProvider>
                 </FinanceProvider>
               </StudyProvider>
             </GoalsProvider>

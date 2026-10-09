@@ -25,6 +25,25 @@ enum AssignmentKind {
   EXAM
 }
 
+enum GameStatus {
+  PLAYING
+  COMPLETED
+  BACKLOG
+  WISHLIST
+}
+
+enum ReadingStatus {
+  READING
+  COMPLETED
+  WANT_TO_READ
+}
+
+enum WatchStatus {
+  WATCHING
+  COMPLETED
+  WATCHLIST
+}
+
 enum RecurringFrequency {
   DAILY
   WEEKLY
@@ -51,6 +70,11 @@ model User {
   grades        Grade[]
   expenses      Expense[]
   budgets       Budget[]
+  games         Game[]
+  books         Book[]
+  movies        Movie[]
+  memories      Memory[]
+  places        Place[]
 
   @@map("users")
 }
@@ -271,4 +295,93 @@ model Budget {
 
   @@unique([userId, month])
   @@map("budgets")
+}
+
+model Game {
+  id        String     @id @default(uuid())
+  title     String
+  status    GameStatus @default(BACKLOG)
+  platform  String?
+  rating    Int?
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("games")
+}
+
+model Book {
+  id          String        @id @default(uuid())
+  title       String
+  author      String?
+  status      ReadingStatus @default(WANT_TO_READ)
+  totalPages  Int?
+  currentPage Int           @default(0)
+  rating      Int?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("books")
+}
+
+model Movie {
+  id        String      @id @default(uuid())
+  title     String
+  kind      String      @default("Movie")
+  status    WatchStatus @default(WATCHLIST)
+  rating    Int?
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("movies")
+}
+
+model Memory {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  date        DateTime @db.Date
+  location    String?
+  tags        String[] @default([])
+  photos      String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@map("memories")
+}
+
+model Place {
+  id          String    @id @default(uuid())
+  name        String
+  location    String?
+  visitedDate DateTime? @db.Date
+  rating      Int?
+  notes       String?
+  photos      String[]  @default([])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("places")
 }
