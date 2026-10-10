@@ -14,6 +14,7 @@ import {
   MapPin,
   Settings,
   BarChart3,
+  Sparkles,
 } from 'lucide-react'
 
 /**
@@ -23,7 +24,10 @@ import {
 export const NAV_SECTIONS = [
   {
     label: null,
-    items: [{ to: '/', label: 'Home', icon: Home, end: true }],
+    items: [
+      { to: '/', label: 'Home', icon: Home, end: true },
+      { to: '/assistant', label: 'Assistant', icon: Sparkles },
+    ],
   },
   {
     label: 'Plan',

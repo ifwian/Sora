@@ -21,6 +21,7 @@ import { HabitsPage } from './pages/HabitsPage'
 import { StudyPage } from './pages/StudyPage'
 import { FinancePage } from './pages/FinancePage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
+import { AssistantPage } from './pages/AssistantPage'
 import { GamesPage } from './pages/GamesPage'
 import { ReadingPage } from './pages/ReadingPage'
 import { MoviesPage } from './pages/MoviesPage'
@@ -74,6 +75,7 @@ function App() {
               <Route path="study" element={<StudyPage />} />
               <Route path="finance" element={<FinancePage />} />
               <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="assistant" element={<AssistantPage />} />
               <Route path="games" element={<GamesPage />} />
               <Route path="reading" element={<ReadingPage />} />
               <Route path="movies" element={<MoviesPage />} />

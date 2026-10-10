@@ -20,5 +20,9 @@ export const env = {
   databaseUrl: requireEnv('DATABASE_URL'),
   jwtSecret: requireEnv('JWT_SECRET'),
   jwtExpiresIn: requireEnv('JWT_EXPIRES_IN', '7d'),
+  // Optional — the Assistant is disabled (with a clear message) when no key is set.
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY || null,
+  anthropicModel: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5',
+  anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || undefined,
   isProduction: process.env.NODE_ENV === 'production',
 }
