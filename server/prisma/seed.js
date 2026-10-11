@@ -1,6 +1,11 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
 
+if (process.env.NODE_ENV === 'production') {
+  console.error('Refusing to seed: this script creates a demo account with a publicly known password.')
+  process.exit(1)
+}
+
 const prisma = new PrismaClient()
 
 async function main() {

@@ -6,6 +6,10 @@ import { signToken } from '../utils/jwt.js'
 
 const SALT_ROUNDS = 10
 
+// Compared against when the email doesn't exist, so a login for an unknown
+// email takes as long as one for a real account (no timing side-channel).
+const DUMMY_HASH = bcrypt.hashSync('not-a-real-password', SALT_ROUNDS)
+
 function serializeUser(user) {
   return { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt }
 }
@@ -35,10 +39,8 @@ export const login = asyncHandler(async (req, res) => {
   // is wrong — never reveal which one it was.
   const invalidCredentials = () => new ApiError(401, 'Invalid email or password')
 
-  if (!user) throw invalidCredentials()
-
-  const passwordMatches = await bcrypt.compare(password, user.passwordHash)
-  if (!passwordMatches) throw invalidCredentials()
+  const passwordMatches = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH)
+  if (!user || !passwordMatches) throw invalidCredentials()
 
   const token = signToken(user.id)
   res.json({ success: true, data: { user: serializeUser(user), token } })

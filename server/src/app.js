@@ -9,6 +9,8 @@ import routes from './routes/index.js'
 
 export const app = express()
 
+if (env.trustProxy > 0) app.set('trust proxy', env.trustProxy)
+
 // Security headers
 app.use(helmet())
 
@@ -16,7 +18,7 @@ app.use(helmet())
 app.use(cors({ origin: env.clientOrigin }))
 
 // Parse JSON request bodies
-app.use(express.json())
+app.use(express.json({ limit: '100kb' }))
 
 // Request logging — concise in production, verbose in development
 app.use(morgan(env.isProduction ? 'combined' : 'dev'))
