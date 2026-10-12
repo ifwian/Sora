@@ -6,7 +6,7 @@ import { Button } from './Button'
  */
 export function ErrorState({ message = 'Something went wrong.', onRetry }) {
   return (
-    <div className="flex flex-col items-center justify-center text-center gap-2 py-12">
+    <div role="alert" className="flex flex-col items-center justify-center text-center gap-2 py-12">
       <AlertTriangle size={18} className="text-danger" />
       <p className="text-sm text-foreground">{message}</p>
       {onRetry && (

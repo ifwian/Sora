@@ -13,7 +13,7 @@ export function LibraryList({ title, resource, entity, statuses, fields, renderI
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      <Tabs options={statuses} value={status} onChange={setStatus} className="flex-wrap" />
+      <Tabs options={statuses} value={status} onChange={setStatus} />
       <ResourcePanel
         resource={filtered}
         entity={entity}

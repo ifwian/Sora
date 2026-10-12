@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '../../utils/cn'
 
@@ -11,6 +11,8 @@ import { cn } from '../../utils/cn'
  */
 export function Modal({ open, onClose, title, description, className, children }) {
   const panelRef = useRef(null)
+  const titleId = useId()
+  const descriptionId = useId()
   const triggerRef = useRef(null)
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export function Modal({ open, onClose, title, description, className, children }
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <motion.div
+          <m.div
             className="absolute inset-0 bg-black/40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -64,31 +66,31 @@ export function Modal({ open, onClose, title, description, className, children }
             onClick={onClose}
             aria-hidden="true"
           />
-          <motion.div
+          <m.div
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-labelledby={title ? 'modal-title' : undefined}
-            aria-describedby={description ? 'modal-description' : undefined}
+            aria-labelledby={title ? titleId : undefined}
+            aria-describedby={description ? descriptionId : undefined}
             tabIndex={-1}
             initial={{ opacity: 0, scale: 0.97, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 8 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className={cn(
-              'relative w-full max-w-md bg-surface border border-border rounded-lg shadow-lg p-6',
+              'relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto bg-surface border border-border rounded-lg shadow-lg p-6',
               className
             )}
           >
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 {title && (
-                  <h2 id="modal-title" className="text-base font-semibold text-foreground">
+                  <h2 id={titleId} className="text-base font-semibold text-foreground">
                     {title}
                   </h2>
                 )}
                 {description && (
-                  <p id="modal-description" className="text-sm text-muted mt-1">
+                  <p id={descriptionId} className="text-sm text-muted mt-1">
                     {description}
                   </p>
                 )}
@@ -103,7 +105,7 @@ export function Modal({ open, onClose, title, description, className, children }
               </button>
             </div>
             {children}
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>,

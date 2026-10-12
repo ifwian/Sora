@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { LazyMotion, MotionConfig, domAnimation } from 'framer-motion'
 import '@fontsource-variable/manrope'
 import './index.css'
 import App from './App.jsx'
@@ -12,7 +13,12 @@ createRoot(document.getElementById('root')).render(
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <App />
+          {/* LazyMotion + the lightweight `m` components keep most of framer-motion out of the main bundle */}
+          <LazyMotion features={domAnimation} strict>
+            <MotionConfig reducedMotion="user">
+              <App />
+            </MotionConfig>
+          </LazyMotion>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>

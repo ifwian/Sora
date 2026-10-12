@@ -103,7 +103,7 @@ export function StudyPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold tracking-tight">Study</h1>
-      <Tabs options={TABS} value={tab} onChange={setTab} className="flex-wrap" />
+      <Tabs options={TABS} value={tab} onChange={setTab} />
 
       {tab === 'OVERVIEW' && (
         <Overview subjects={subjects} assignments={assignments} sessions={sessions} grades={grades} />

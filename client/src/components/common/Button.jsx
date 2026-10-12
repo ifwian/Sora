@@ -8,7 +8,7 @@ const VARIANTS = {
   ghost:
     'bg-transparent text-foreground hover:bg-surface-hover',
   danger:
-    'bg-danger text-white hover:opacity-90',
+    'bg-danger text-danger-foreground hover:bg-danger-hover',
 }
 
 const SIZES = {

@@ -55,7 +55,7 @@ export function TaskItem({ task, onToggleComplete, onEdit, onDelete }) {
           {task.priority}
         </Badge>
       )}
-      <Badge variant="default" className="shrink-0">
+      <Badge variant="default" className="shrink-0 max-sm:hidden">
         {task.category}
       </Badge>
 

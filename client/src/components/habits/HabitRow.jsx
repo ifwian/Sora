@@ -42,7 +42,7 @@ export function HabitRow({ habit, onToggle, onEdit, onDelete }) {
                 'h-7 w-7 rounded-sm border text-xs transition-colors duration-150',
                 isDone
                   ? 'bg-accent border-accent text-accent-foreground'
-                  : 'bg-surface border-border text-muted hover:border-accent'
+                  : 'bg-surface border-control text-muted hover:border-accent'
               )}
             >
               {Number(date.slice(8, 10))}

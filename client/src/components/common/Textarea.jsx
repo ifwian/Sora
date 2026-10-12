@@ -34,7 +34,7 @@ export function Textarea({
           'placeholder:text-muted',
           'transition-colors duration-150',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-          error ? 'border-danger' : 'border-border',
+          error ? 'border-danger' : 'border-control',
           className
         )}
         {...props}

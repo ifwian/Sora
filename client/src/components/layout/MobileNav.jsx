@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { createPortal } from 'react-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { MoreHorizontal, X } from 'lucide-react'
 import { MOBILE_PRIMARY_ITEMS, NAV_SECTIONS, SETTINGS_ITEM } from '../../constants/navigation'
 import { cn } from '../../utils/cn'
@@ -32,7 +32,7 @@ export function MobileNav({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
   return (
     <>
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 h-16 bg-surface border-t border-border flex items-stretch z-30"
+        className="md:hidden fixed bottom-0 inset-x-0 h-[calc(4rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] bg-surface border-t border-border flex items-stretch z-30"
         aria-label="Primary"
       >
         {MOBILE_PRIMARY_ITEMS.map((item) => (
@@ -52,7 +52,7 @@ export function MobileNav({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
         <AnimatePresence>
           {drawerOpen && (
             <div className="md:hidden fixed inset-0 z-40">
-              <motion.div
+              <m.div
                 className="absolute inset-0 bg-black/40"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -61,7 +61,7 @@ export function MobileNav({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
                 onClick={onCloseDrawer}
                 aria-hidden="true"
               />
-              <motion.div
+              <m.div
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
@@ -131,7 +131,7 @@ export function MobileNav({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
                     {SETTINGS_ITEM.label}
                   </NavLink>
                 </div>
-              </motion.div>
+              </m.div>
             </div>
           )}
         </AnimatePresence>,

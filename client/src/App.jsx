@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import { TasksProvider } from './context/TasksContext'
 import { NotesProvider } from './context/NotesContext'
@@ -13,26 +14,29 @@ import { AppLayout } from './layouts/AppLayout'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { DashboardPage } from './pages/DashboardPage'
-import { TasksPage } from './pages/TasksPage'
-import { NotesPage } from './pages/NotesPage'
-import { CalendarPage } from './pages/CalendarPage'
-import { GoalsPage } from './pages/GoalsPage'
-import { HabitsPage } from './pages/HabitsPage'
-import { StudyPage } from './pages/StudyPage'
-import { FinancePage } from './pages/FinancePage'
-import { AnalyticsPage } from './pages/AnalyticsPage'
-import { AssistantPage } from './pages/AssistantPage'
-import { GamesPage } from './pages/GamesPage'
-import { ReadingPage } from './pages/ReadingPage'
-import { MoviesPage } from './pages/MoviesPage'
-import { MemoriesPage } from './pages/MemoriesPage'
-import { PlacesPage } from './pages/PlacesPage'
-import { SettingsPage } from './pages/SettingsPage'
-import { DesignSystemPage } from './pages/DesignSystemPage'
-import { NotFoundPage } from './pages/NotFoundPage'
 
-/** DataProviders — the per-user data contexts, only mounted once authenticated. */
-function DataProviders() {
+// Every other page is loaded on demand, so the first screen only downloads what it needs.
+const page = (load, name) => lazy(() => load().then((module) => ({ default: module[name] })))
+const TasksPage = page(() => import('./pages/TasksPage'), 'TasksPage')
+const NotesPage = page(() => import('./pages/NotesPage'), 'NotesPage')
+const CalendarPage = page(() => import('./pages/CalendarPage'), 'CalendarPage')
+const GoalsPage = page(() => import('./pages/GoalsPage'), 'GoalsPage')
+const HabitsPage = page(() => import('./pages/HabitsPage'), 'HabitsPage')
+const StudyPage = page(() => import('./pages/StudyPage'), 'StudyPage')
+const FinancePage = page(() => import('./pages/FinancePage'), 'FinancePage')
+const AnalyticsPage = page(() => import('./pages/AnalyticsPage'), 'AnalyticsPage')
+const AssistantPage = page(() => import('./pages/AssistantPage'), 'AssistantPage')
+const GamesPage = page(() => import('./pages/GamesPage'), 'GamesPage')
+const ReadingPage = page(() => import('./pages/ReadingPage'), 'ReadingPage')
+const MoviesPage = page(() => import('./pages/MoviesPage'), 'MoviesPage')
+const MemoriesPage = page(() => import('./pages/MemoriesPage'), 'MemoriesPage')
+const PlacesPage = page(() => import('./pages/PlacesPage'), 'PlacesPage')
+const SettingsPage = page(() => import('./pages/SettingsPage'), 'SettingsPage')
+const DesignSystemPage = page(() => import('./pages/DesignSystemPage'), 'DesignSystemPage')
+const NotFoundPage = page(() => import('./pages/NotFoundPage'), 'NotFoundPage')
+
+/** Data every signed-in screen (dashboard widgets, search, notifications) relies on. */
+function CoreProviders() {
   return (
     <TasksProvider>
       <NotesProvider>
@@ -41,11 +45,7 @@ function DataProviders() {
             <GoalsProvider>
               <StudyProvider>
                 <FinanceProvider>
-                  <LibraryProvider>
-                    <MemoriesProvider>
-                      <Outlet />
-                    </MemoriesProvider>
-                  </LibraryProvider>
+                  <Outlet />
                 </FinanceProvider>
               </StudyProvider>
             </GoalsProvider>
@@ -53,6 +53,15 @@ function DataProviders() {
         </EventsProvider>
       </NotesProvider>
     </TasksProvider>
+  )
+}
+
+/** Wraps a group of routes in a provider that only loads its data when one of them is visited. */
+function ProviderRoute({ Provider }) {
+  return (
+    <Provider>
+      <Outlet />
+    </Provider>
   )
 }
 
@@ -64,7 +73,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route element={<DataProviders />}>
+          <Route element={<CoreProviders />}>
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="tasks" element={<TasksPage />} />
@@ -74,15 +83,23 @@ function App() {
               <Route path="habits" element={<HabitsPage />} />
               <Route path="study" element={<StudyPage />} />
               <Route path="finance" element={<FinancePage />} />
-              <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="assistant" element={<AssistantPage />} />
-              <Route path="games" element={<GamesPage />} />
-              <Route path="reading" element={<ReadingPage />} />
-              <Route path="movies" element={<MoviesPage />} />
-              <Route path="memories" element={<MemoriesPage />} />
-              <Route path="places" element={<PlacesPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="dev/design-system" element={<DesignSystemPage />} />
+
+              {/* Library data is only fetched on the pages (and Analytics) that use it */}
+              <Route element={<ProviderRoute Provider={LibraryProvider} />}>
+                <Route path="analytics" element={<AnalyticsPage />} />
+                <Route path="games" element={<GamesPage />} />
+                <Route path="reading" element={<ReadingPage />} />
+                <Route path="movies" element={<MoviesPage />} />
+              </Route>
+
+              <Route element={<ProviderRoute Provider={MemoriesProvider} />}>
+                <Route path="memories" element={<MemoriesPage />} />
+                <Route path="places" element={<PlacesPage />} />
+              </Route>
+
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Route>

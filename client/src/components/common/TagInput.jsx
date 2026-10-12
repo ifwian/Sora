@@ -32,7 +32,7 @@ export function TagInput({ label, tags, onChange }) {
   return (
     <div className="flex flex-col gap-1.5">
       {label && <span className="text-sm font-medium text-foreground">{label}</span>}
-      <div className="flex flex-wrap items-center gap-1.5 min-h-10 px-2 py-1.5 rounded-sm bg-surface border border-border focus-within:ring-2 focus-within:ring-accent">
+      <div className="flex flex-wrap items-center gap-1.5 min-h-10 px-2 py-1.5 rounded-sm bg-surface border border-control focus-within:ring-2 focus-within:ring-accent">
         {tags.map((tag) => (
           <Badge key={tag} variant="default" className="gap-1">
             {tag}

@@ -17,7 +17,7 @@ export function TaskFilters({ filters, onChange }) {
           value={filters.search}
           onChange={(event) => update('search', event.target.value)}
           placeholder="Search tasks..."
-          className="h-10 w-full pl-9 pr-3 rounded-sm bg-surface border border-border text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="h-10 w-full pl-9 pr-3 rounded-sm bg-surface border border-control text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         />
       </label>
 

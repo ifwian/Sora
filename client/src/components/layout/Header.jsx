@@ -35,7 +35,7 @@ export function Header({ onOpenMobileNav }) {
         <Menu size={20} />
       </button>
 
-      <div className="flex-1 max-w-md">
+      <div className="flex-1 min-w-0 max-w-md">
         <SearchBar />
       </div>
 

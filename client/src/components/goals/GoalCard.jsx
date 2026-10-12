@@ -98,12 +98,12 @@ export function GoalCard({ goal, onEdit, onDelete, onToggleGoal, onAddMilestone,
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Add a milestone"
           aria-label={`Add a milestone to ${goal.title}`}
-          className="h-8 flex-1 px-3 rounded-sm bg-surface border border-border text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="h-8 flex-1 px-3 rounded-sm bg-surface border border-control text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         />
         <button
           type="submit"
           aria-label="Add milestone"
-          className="h-8 w-8 flex items-center justify-center rounded-sm border border-border text-muted hover:text-foreground hover:bg-surface-hover"
+          className="h-8 w-8 flex items-center justify-center rounded-sm border border-control text-muted hover:text-foreground hover:bg-surface-hover"
         >
           <Plus size={14} />
         </button>

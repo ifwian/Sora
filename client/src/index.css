@@ -10,6 +10,8 @@
   --color-surface: #ffffff;
   --color-surface-hover: #f1f1ef;
   --color-border: #e4e4e1;
+  /* Borders of interactive controls (inputs, checkboxes). Stronger than --color-border so they meet the 3:1 contrast WCAG asks of UI components. */
+  --color-control: #8b8a84;
   --color-foreground: #1c1b1a;
   --color-muted: #6b6963;
 
@@ -19,11 +21,13 @@
   --color-accent-foreground: #ffffff;
 
   /* Status (kept subtle) */
-  --color-success: #2e7d5b;
+  --color-success: #26704f;
   --color-success-bg: #e8f3ee;
-  --color-warning: #b8862b;
+  --color-warning: #8a6112;
   --color-warning-bg: #f7f0e2;
   --color-danger: #b23b3b;
+  --color-danger-hover: #9a3030;
+  --color-danger-foreground: #ffffff;
   --color-danger-bg: #f7eaea;
 
   /* Shape */
@@ -37,6 +41,7 @@
   --color-surface: #1b1b1a;
   --color-surface-hover: #232322;
   --color-border: #2e2e2c;
+  --color-control: #706f6a;
   --color-foreground: #ededeb;
   --color-muted: #9b9a94;
 
@@ -49,6 +54,8 @@
   --color-warning: #d2a44c;
   --color-warning-bg: #26200f;
   --color-danger: #d46a6a;
+  --color-danger-hover: #e08080;
+  --color-danger-foreground: #1a0b0b;
   --color-danger-bg: #271616;
 }
 
@@ -76,4 +83,16 @@ body {
 *:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+/* Respect the OS "reduce motion" setting: no transitions or spinners-as-animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

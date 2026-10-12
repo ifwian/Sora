@@ -1,4 +1,4 @@
-import { getMonthGrid, isSameMonth, isToday } from '../../utils/calendar'
+import { formatDayLabel, getMonthGrid, isSameMonth, isToday } from '../../utils/calendar'
 import { getItemsForDate } from '../../utils/calendarItems'
 import { AgendaItem } from './AgendaItem'
 import { cn } from '../../utils/cn'
@@ -32,23 +32,21 @@ export function MonthView({ anchorDate, events, tasks, onDayClick, onItemClick }
           return (
             <div
               key={isoDate}
-              role="button"
-              tabIndex={0}
               onClick={() => onDayClick(isoDate)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
-                  onDayClick(isoDate)
-                }
-              }}
               className={cn(
                 'min-h-24 border-b border-r border-border p-1.5 text-left flex flex-col gap-1 last:border-r-0 cursor-pointer hover:bg-surface-hover/50',
                 !inMonth && 'bg-background/50'
               )}
             >
-              <span
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onDayClick(isoDate)
+                }}
+                aria-label={`Open ${formatDayLabel(isoDate, { weekday: 'long', month: 'long', day: 'numeric' })}`}
                 className={cn(
-                  'text-xs h-5 w-5 flex items-center justify-center rounded-full',
+                  'self-start text-xs h-5 w-5 flex items-center justify-center rounded-full',
                   isToday(isoDate)
                     ? 'bg-accent text-accent-foreground font-semibold'
                     : inMonth
@@ -57,7 +55,7 @@ export function MonthView({ anchorDate, events, tasks, onDayClick, onItemClick }
                 )}
               >
                 {Number(isoDate.slice(8, 10))}
-              </span>
+              </button>
               <div className="flex flex-col gap-0.5">
                 {visible.map((item) => (
                   <AgendaItem

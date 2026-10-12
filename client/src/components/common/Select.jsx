@@ -24,7 +24,7 @@ export function Select({ label, options, className, id, error, ...props }) {
           aria-describedby={error ? `${selectId}-error` : undefined}
           className={cn(
             'h-10 w-full appearance-none pl-3 pr-8 rounded-sm bg-surface border text-sm text-foreground',
-            error ? 'border-danger' : 'border-border',
+            error ? 'border-danger' : 'border-control',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
             className
           )}

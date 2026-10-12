@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { CheckCircle2, AlertTriangle, XCircle, Info, X } from 'lucide-react'
 import { cn } from '../utils/cn'
 import { ToastContext } from './toast-context'
@@ -46,12 +46,12 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={value}>
       {children}
       {createPortal(
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm">
+        <div className="pointer-events-none fixed bottom-20 inset-x-4 md:inset-x-auto md:bottom-4 md:right-4 z-50 flex flex-col gap-2 md:w-full md:max-w-sm">
           <AnimatePresence>
             {toasts.map((toast) => {
               const Icon = ICONS[toast.variant] ?? Info
               return (
-                <motion.div
+                <m.div
                   key={toast.id}
                   role="status"
                   layout
@@ -60,7 +60,7 @@ export function ToastProvider({ children }) {
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
                   className={cn(
-                    'flex items-start gap-3 bg-surface border border-border rounded-md shadow-lg p-4'
+                    'pointer-events-auto flex items-start gap-3 bg-surface border border-border rounded-md shadow-lg p-4'
                   )}
                 >
                   <Icon size={18} className={cn('shrink-0 mt-0.5', ICON_COLOR[toast.variant])} />
@@ -73,7 +73,7 @@ export function ToastProvider({ children }) {
                   >
                     <X size={16} />
                   </button>
-                </motion.div>
+                </m.div>
               )
             })}
           </AnimatePresence>

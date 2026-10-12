@@ -16,7 +16,7 @@ export function Checkbox({ checked, onChange, label, className }) {
         'flex items-center justify-center h-5 w-5 rounded-sm border shrink-0 transition-colors duration-150',
         checked
           ? 'bg-accent border-accent text-accent-foreground'
-          : 'border-border bg-surface hover:border-accent',
+          : 'border-control bg-surface hover:border-accent',
         className
       )}
     >

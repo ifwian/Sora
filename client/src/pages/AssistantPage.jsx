@@ -154,7 +154,7 @@ export function AssistantPage() {
             rows={2}
             maxLength={4000}
             placeholder="Ask about your day, deadlines, spending… (Enter to send, Shift+Enter for a new line)"
-            className="w-full px-3 py-2 rounded-sm bg-surface border border-border text-sm text-foreground placeholder:text-muted resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="w-full px-3 py-2 rounded-sm bg-surface border border-control text-sm text-foreground placeholder:text-muted resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           />
         </label>
         <Button type="submit" disabled={sending || draft.trim() === ''} aria-label="Send message">
