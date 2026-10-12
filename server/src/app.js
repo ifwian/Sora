@@ -21,7 +21,9 @@ app.use(cors({ origin: env.clientOrigin }))
 app.use(express.json({ limit: '100kb' }))
 
 // Request logging — concise in production, verbose in development
-app.use(morgan(env.isProduction ? 'combined' : 'dev'))
+if (env.nodeEnv !== 'test') {
+  app.use(morgan(env.isProduction ? 'combined' : 'dev'))
+}
 
 // General rate limit across the whole API
 app.use('/api', apiLimiter)

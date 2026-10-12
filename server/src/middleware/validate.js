@@ -8,6 +8,13 @@ export function validateBody(schema) {
       const message = result.error.issues.map((issue) => issue.message).join(', ')
       return next(new ApiError(400, message))
     }
+
+    // A PATCH that validates but changes nothing (e.g. only unknown fields, which zod strips)
+    // is almost certainly a client mistake — say so instead of silently doing nothing.
+    if (req.method === 'PATCH' && Object.keys(result.data).length === 0) {
+      return next(new ApiError(400, 'No valid fields to update'))
+    }
+
     req.body = result.data
     next()
   }
