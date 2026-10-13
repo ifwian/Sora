@@ -33,9 +33,8 @@ export const env = {
   jwtSecret,
   jwtExpiresIn: requireEnv('JWT_EXPIRES_IN', '7d'),
   // Optional — the Assistant is disabled (with a clear message) when no key is set.
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY || null,
-  anthropicModel: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5',
-  anthropicBaseUrl: process.env.ANTHROPIC_BASE_URL || undefined,
+  geminiApiKey: process.env.GEMINI_API_KEY || null,
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
   // Number of reverse proxies in front of the API (Render/Railway = 1). Needed so rate limiting
   // sees each visitor's real IP instead of the proxy's. Leave 0 when running locally.
   trustProxy: Number(process.env.TRUST_PROXY ?? 0),

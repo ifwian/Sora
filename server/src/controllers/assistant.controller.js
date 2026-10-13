@@ -1,14 +1,17 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { env } from '../config/env.js'
 import { prisma } from '../config/prisma.js'
 import { ApiError } from '../utils/ApiError.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { buildAssistantContext } from '../services/assistantContext.js'
 
-let client = null
-function getClient() {
-  if (!client) client = new Anthropic({ apiKey: env.anthropicApiKey, baseURL: env.anthropicBaseUrl })
-  return client
+let genAI = null
+function getGenAI() {
+  if (!genAI) {
+    if (!env.geminiApiKey) throw new Error('GEMINI_API_KEY not set')
+    genAI = new GoogleGenerativeAI(env.geminiApiKey)
+  }
+  return genAI
 }
 
 function systemPrompt(dataBlock) {
@@ -28,33 +31,29 @@ ${dataBlock}
 
 /** POST /api/assistant/chat — read-only assistant grounded in the current user's own data. */
 export const chat = asyncHandler(async (req, res) => {
-  if (!env.anthropicApiKey) {
-    throw new ApiError(503, "The assistant isn't set up yet. Add ANTHROPIC_API_KEY to the server's .env file and restart it.")
+  if (!env.geminiApiKey) {
+    throw new ApiError(503, "The assistant isn't set up yet. Add GEMINI_API_KEY to the server's .env file and restart it.")
   }
 
   const { messages, today } = req.body
   const user = await prisma.user.findUnique({ where: { id: req.userId } })
   const dataBlock = await buildAssistantContext({ userId: req.userId, today, userName: user?.name })
 
+  const genAI = getGenAI()
+  const model = genAI.getGenerativeModel({ model: env.geminiModel })
+
   let response
   try {
-    response = await getClient().messages.create({
-      model: env.anthropicModel,
-      max_tokens: 1024,
-      system: systemPrompt(dataBlock),
-      messages,
+    response = await model.generateContent({
+      systemInstruction: systemPrompt(dataBlock),
+      contents: messages.map(m => `${m.role}: ${m.content}`),
     })
   } catch (error) {
-    // Log the detail server-side; never expose provider errors or keys to the browser.
-    console.error('Assistant request failed:', error.status ?? '', error.message)
+    console.error('Assistant request failed:', error.message)
     throw new ApiError(502, 'The assistant is unavailable right now. Please try again in a moment.')
   }
 
-  const reply = response.content
-    .filter((block) => block.type === 'text')
-    .map((block) => block.text)
-    .join('\n')
-    .trim()
+  const reply = response.response?.text || 'I couldn't come up with an answer for that.'
 
-  res.json({ success: true, data: { reply: reply || "I couldn't come up with an answer for that." } })
+  res.json({ success: true, data: { reply } })
 })
