@@ -1,7 +1,9 @@
 import { prisma } from '../config/prisma.js'
 import { ApiError } from '../utils/ApiError.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
-import { toDateOnly } from '../utils/serializeDate.js'
+import { coerceDates, toDateOnly } from '../utils/serializeDate.js'
+
+const DATE_FIELDS = ['deadline']
 
 function serializeGoal(goal) {
   return { ...goal, deadline: toDateOnly(goal.deadline), milestones: goal.milestones ?? [] }
@@ -18,7 +20,7 @@ export const getGoals = asyncHandler(async (req, res) => {
 
 export const createGoal = asyncHandler(async (req, res) => {
   const goal = await prisma.goal.create({
-    data: { ...req.body, userId: req.userId },
+    data: { ...coerceDates(req.body, DATE_FIELDS), userId: req.userId },
     include: { milestones: true },
   })
   res.status(201).json({ success: true, data: serializeGoal(goal) })
@@ -36,7 +38,7 @@ export const updateGoal = asyncHandler(async (req, res) => {
   await findOwnedGoal(req.params.id, req.userId)
   const goal = await prisma.goal.update({
     where: { id: req.params.id },
-    data: req.body,
+    data: coerceDates(req.body, DATE_FIELDS),
     include: { milestones: { orderBy: { order: 'asc' } } },
   })
   res.json({ success: true, data: serializeGoal(goal) })

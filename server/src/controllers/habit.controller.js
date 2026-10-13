@@ -1,7 +1,7 @@
 import { prisma } from '../config/prisma.js'
 import { ApiError } from '../utils/ApiError.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
-import { toDateOnly } from '../utils/serializeDate.js'
+import { fromDateOnly, toDateOnly } from '../utils/serializeDate.js'
 
 function serializeHabit(habit) {
   return {
@@ -60,7 +60,9 @@ export const deleteHabit = asyncHandler(async (req, res) => {
 /** POST /api/habits/:id/toggle — toggle completion for a given date. */
 export const toggleCompletion = asyncHandler(async (req, res) => {
   await findOwnedHabit(req.params.id, req.userId)
-  const { date } = req.body
+  // habit_completions has a compound unique on (habitId, date), and `date` is a
+  // DATE column, so both the lookup and the write need a real Date, not "YYYY-MM-DD".
+  const date = fromDateOnly(req.body.date)
 
   const existing = await prisma.habitCompletion.findUnique({
     where: { habitId_date: { habitId: req.params.id, date } },

@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { prisma } from '../config/prisma.js'
 import { ApiError } from './ApiError.js'
 import { asyncHandler } from './asyncHandler.js'
-import { toDateOnly } from './serializeDate.js'
+import { coerceDates, toDateOnly } from './serializeDate.js'
 import { validateBody } from '../middleware/validate.js'
 
 /**
@@ -39,6 +39,10 @@ export function createCrudRouter({
     return out
   }
 
+  // The same fields Prisma returns as Date objects have to be sent to it as Date
+  // objects: a bare "YYYY-MM-DD" string is rejected by the query engine.
+  const prepare = (body) => coerceDates(body, dateFields)
+
   async function assertParentOwned(body, userId) {
     const parentId = parent && body[parent.field]
     if (!parentId) return
@@ -67,7 +71,7 @@ export function createCrudRouter({
     validateBody(createSchema),
     asyncHandler(async (req, res) => {
       await assertParentOwned(req.body, req.userId)
-      const row = await prisma[model].create({ data: { ...req.body, userId: req.userId } })
+      const row = await prisma[model].create({ data: { ...prepare(req.body), userId: req.userId } })
       res.status(201).json({ success: true, data: serialize(row) })
     })
   )
@@ -78,7 +82,7 @@ export function createCrudRouter({
     asyncHandler(async (req, res) => {
       await findOwned(req.params.id, req.userId)
       await assertParentOwned(req.body, req.userId)
-      const row = await prisma[model].update({ where: { id: req.params.id }, data: req.body })
+      const row = await prisma[model].update({ where: { id: req.params.id }, data: prepare(req.body) })
       res.json({ success: true, data: serialize(row) })
     })
   )

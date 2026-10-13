@@ -1,7 +1,9 @@
 import { prisma } from '../config/prisma.js'
 import { ApiError } from '../utils/ApiError.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
-import { toDateOnly } from '../utils/serializeDate.js'
+import { coerceDates, toDateOnly } from '../utils/serializeDate.js'
+
+const DATE_FIELDS = ['dueDate']
 
 function serializeTask(task) {
   return { ...task, dueDate: toDateOnly(task.dueDate) }
@@ -20,7 +22,7 @@ export const getTasks = asyncHandler(async (req, res) => {
 export const createTask = asyncHandler(async (req, res) => {
   const completedAt = req.body.status === 'COMPLETED' ? new Date() : null
   const task = await prisma.task.create({
-    data: { ...req.body, completedAt, userId: req.userId },
+    data: { ...coerceDates(req.body, DATE_FIELDS), completedAt, userId: req.userId },
   })
   res.status(201).json({ success: true, data: serializeTask(task) })
 })
@@ -40,7 +42,7 @@ export const updateTask = asyncHandler(async (req, res) => {
 
   // completedAt is server-controlled: set the first time a task becomes
   // COMPLETED, kept if it stays completed, cleared if it's reopened.
-  const data = { ...req.body }
+  const data = coerceDates(req.body, DATE_FIELDS)
   if (req.body.status !== undefined) {
     data.completedAt = req.body.status === 'COMPLETED' ? (existing.completedAt ?? new Date()) : null
   }
