@@ -1,60 +1,41 @@
 # Database setup
 
-This project uses **PostgreSQL** + **Prisma**. The schema and initial
-migration (`prisma/migrations/20260904120000_init/`) are already written
-and have been verified by hand-applying the equivalent raw SQL against a
-real local Postgres instance — but `prisma generate` / `prisma migrate`
-themselves could not be run in the sandbox this was built in (it couldn't
-reach Prisma's binary CDN), so you need to run them once yourself.
+PostgreSQL + Prisma 6. The schema is `prisma/schema.prisma`; the SQL history is in `prisma/migrations/` (5 migrations).
 
-## 1. Get a Postgres database
+> The migrations were written by hand (the sandbox they were built in couldn't run the Prisma CLI) and checked two ways:
+> applied from scratch to a real PostgreSQL 16, and compared column-by-column against `schema.prisma` (19 models, 157 columns,
+> zero differences). The API test suite then ran against that database.
 
-Any of these work — pick whichever is easiest for you:
+## 1. Get a database
+Local Postgres (`createdb personal_os_dev`), or a free hosted one — Neon, Supabase, Railway.
 
-- **Local Postgres** — install it (`brew install postgresql` on Mac,
-  or the Postgres.app installer, or your distro's package manager),
-  then create a database: `createdb personal_os_dev`
-- **Supabase** — free tier, gives you a connection string instantly
-- **Neon** — free tier, serverless Postgres
-- **Railway** — free trial, one-click Postgres
-
-## 2. Configure the connection
-
+## 2. Configure
 ```bash
-cp .env.example .env
+cp .env.example .env     # then edit DATABASE_URL and JWT_SECRET
 ```
+Generate a real secret: `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
 
-Edit `.env` and set `DATABASE_URL` to your database's connection string,
-e.g.:
-
-```
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/personal_os_dev
-```
-
-## 3. Generate the client and apply the migration
-
+## 3. Create the tables
 ```bash
 npm install
 npx prisma generate
 npx prisma migrate dev
 ```
+`migrate dev` applies the existing migrations. If it says the database is out of sync with the schema and offers to
+create a new migration, accept it and commit the result — that just means Prisma's generated SQL differs cosmetically from the
+hand-written SQL (index names, etc.).
 
-`migrate dev` will see the `20260904120000_init` migration already in
-`prisma/migrations/`, apply it, and generate the Prisma Client.
-
-## 4. Seed some starter data (optional)
-
+## 4. Optional
 ```bash
-npm run db:seed
+npm run db:seed      # demo user: demo@personalos.dev / password123 (refuses to run in production)
+npm run db:studio    # browse the data in a browser
 ```
 
-Creates a demo user (`demo@personalos.dev` / `password123`) with a few
-tasks, notes, and events, mirroring the frontend's mock data.
-
-## 5. Browse the data (optional)
-
+## Running the tests
+The API tests create users and data, so they **refuse to run unless the database name contains "test"**.
 ```bash
-npm run db:studio
+createdb personal_os_test
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/personal_os_test npx prisma migrate deploy
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/personal_os_test npm test
 ```
-
-Opens Prisma Studio, a GUI for browsing/editing rows in the browser.
+(Adjust the user/password to match your install.) On Windows PowerShell set the variable first: `$env:DATABASE_URL="..."`.

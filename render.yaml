@@ -1,0 +1,28 @@
+# Render "Blueprint" for the API. In Render: New → Blueprint → pick this repo.
+# (The frontend goes on Vercel — see DEPLOYMENT.md.)
+services:
+  - type: web
+    name: personal-os-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL # paste your Neon / Supabase / Railway connection string
+        sync: false
+      - key: JWT_SECRET # Render generates a long random value for you
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_ORIGIN # your Vercel URL, e.g. https://personal-os.vercel.app (no trailing slash)
+        sync: false
+      - key: TRUST_PROXY # Render sits behind one proxy; needed for correct per-visitor rate limits
+        value: "1"
+      - key: ANTHROPIC_API_KEY # optional — leave empty to disable the Assistant
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-5-5
