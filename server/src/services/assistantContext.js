@@ -1,5 +1,5 @@
 import { prisma } from '../config/prisma.js'
-import { toDateOnly } from '../utils/serializeDate.js'
+import { fromDateOnly, toDateOnly } from '../utils/serializeDate.js'
 
 const MAX_TASKS = 40
 
@@ -35,18 +35,21 @@ export async function buildAssistantContext({ userId, today, userName }) {
   const monthStart = `${today.slice(0, 7)}-01`
   const where = { userId }
 
+  // `today`, `weekAgo`, `monthStart` and the horizon are "YYYY-MM-DD" strings.
+  // Every column they filter on is a DATE, so Prisma needs real Dates for the
+  // gte/lte bounds — it rejects a bare date string.
   const [openTasks, doneTasks, events, habits, goals, assignments, sessions, grades, subjects, expenses, budgets] =
     await Promise.all([
       prisma.task.findMany({ where: { ...where, status: { not: 'COMPLETED' } }, orderBy: [{ dueDate: 'asc' }], take: MAX_TASKS + 1 }),
       prisma.task.findMany({ where: { ...where, status: 'COMPLETED', completedAt: { gte: new Date(`${weekAgo}T00:00:00`) } } }),
-      prisma.event.findMany({ where: { ...where, date: { gte: today, lte: addDays(today, 14) } }, orderBy: [{ date: 'asc' }] }),
+      prisma.event.findMany({ where: { ...where, date: { gte: fromDateOnly(today), lte: fromDateOnly(addDays(today, 14)) } }, orderBy: [{ date: 'asc' }] }),
       prisma.habit.findMany({ where, include: { completions: true } }),
       prisma.goal.findMany({ where: { ...where, completed: false }, include: { milestones: true } }),
-      prisma.assignment.findMany({ where: { ...where, completed: false, dueDate: { lte: addDays(today, 30) } }, orderBy: [{ dueDate: 'asc' }] }),
-      prisma.studySession.findMany({ where: { ...where, date: { gte: weekAgo } } }),
+      prisma.assignment.findMany({ where: { ...where, completed: false, dueDate: { lte: fromDateOnly(addDays(today, 30)) } }, orderBy: [{ dueDate: 'asc' }] }),
+      prisma.studySession.findMany({ where: { ...where, date: { gte: fromDateOnly(weekAgo) } } }),
       prisma.grade.findMany({ where }),
       prisma.subject.findMany({ where }),
-      prisma.expense.findMany({ where: { ...where, date: { gte: monthStart } } }),
+      prisma.expense.findMany({ where: { ...where, date: { gte: fromDateOnly(monthStart) } } }),
       prisma.budget.findMany({ where: { ...where, month: today.slice(0, 7) } }),
     ])
 
