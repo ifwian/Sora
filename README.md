@@ -1,4 +1,4 @@
-# Personal OS
+# Sora
 
 A private, full-stack command center for your life — tasks, notes, calendar, habits, goals, study, money, entertainment, memories and an AI assistant, all in one calm, minimalist app with light and dark themes.
 
@@ -49,7 +49,7 @@ _Screenshots aren't included yet — run the app and add your own to `docs/scree
 ## Architecture
 
 ```
-personal-os/
+sora/
 ├── client/                      React app
 │   ├── public/                  theme-init.js (runs before first paint)
 │   ├── tests/                   contrast, notification rules, analytics, chat history

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ThemeContext } from './theme-context'
 
-const STORAGE_KEY = 'personal-os-theme'
+const STORAGE_KEY = 'sora-theme'
 const THEMES = ['light', 'dark', 'system']
 
 function getSystemTheme() {

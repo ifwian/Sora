@@ -2,7 +2,7 @@
 # (The frontend goes on Vercel — see DEPLOYMENT.md.)
 services:
   - type: web
-    name: personal-os-api
+    name: sora-api
     runtime: node
     rootDir: server
     plan: free
@@ -18,7 +18,7 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 7d
-      - key: CLIENT_ORIGIN # your Vercel URL, e.g. https://personal-os.vercel.app (no trailing slash)
+      - key: CLIENT_ORIGIN # your Vercel URL, e.g. https://sora.vercel.app (no trailing slash)
         sync: false
       - key: TRUST_PROXY # Render sits behind one proxy; needed for correct per-visitor rate limits
         value: "1"

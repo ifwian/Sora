@@ -5,7 +5,7 @@ const router = Router()
 router.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Personal OS API is running.',
+    message: 'Sora API is running.',
     timestamp: new Date().toISOString(),
   })
 })

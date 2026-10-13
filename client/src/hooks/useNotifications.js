@@ -9,7 +9,7 @@ import { useFinance } from './useFinance'
 import { buildNotifications } from '../utils/notificationRules'
 import { todayISO } from '../utils/date'
 
-const storageKeyFor = (userId) => `personal-os-dismissed:${userId}`
+const storageKeyFor = (userId) => `sora-dismissed:${userId}`
 
 function readDismissed(key) {
   try {

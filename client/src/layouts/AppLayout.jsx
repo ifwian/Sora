@@ -23,7 +23,7 @@ export function AppLayout() {
   const firstRender = useRef(true)
 
   useEffect(() => {
-    document.title = `${TITLES[pathname] ?? 'Personal OS'} · Personal OS`
+    document.title = `${TITLES[pathname] ?? 'Sora'} · Sora`
     if (firstRender.current) {
       firstRender.current = false
       return

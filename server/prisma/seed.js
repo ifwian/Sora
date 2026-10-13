@@ -75,7 +75,7 @@ async function main() {
       {
         userId: user.id,
         title: 'Project ideas',
-        content: 'Personal OS, a habit tracker widget, a small CLI tool.',
+        content: 'Sora, a habit tracker widget, a small CLI tool.',
         tags: ['ideas'],
       },
     ],

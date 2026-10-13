@@ -1,4 +1,4 @@
-# Deploying Personal OS
+# Deploying Sora
 
 ```
  Browser ──▶ Vercel (React app, static)  ──▶ Render (Express API) ──▶ Neon / Supabase (PostgreSQL)
@@ -8,9 +8,9 @@ You'll need free accounts on **GitHub**, **Vercel**, **Render**, and **Neon** (o
 Do the steps in this order — each one produces a URL the next step needs.
 
 ## 0. Push the project to GitHub
-Create an empty GitHub repo, then from the `personal-os` folder:
+Create an empty GitHub repo, then from the `sora` folder:
 ```bash
-git remote add origin https://github.com/YOUR-USER/personal-os.git
+git remote add origin https://github.com/YOUR-USER/sora.git
 git push -u origin main
 ```
 (If your default branch is `master`, push that instead.) `.env` files are git-ignored, so no secrets are uploaded.
@@ -34,7 +34,7 @@ place the Prisma-generated client runs for real. Check the **Actions** tab; if i
 
    `JWT_SECRET` is generated for you; `TRUST_PROXY=1` and `NODE_ENV=production` are already set.
 3. Deploy. The build runs `prisma generate` and `prisma migrate deploy`, which creates all tables.
-4. When it's live, open `https://YOUR-API.onrender.com/api/health` — you should see `"Personal OS API is running."`
+4. When it's live, open `https://YOUR-API.onrender.com/api/health` — you should see `"Sora API is running."`
    Copy the base URL (no trailing slash).
 
 ## 3. Frontend on Vercel
@@ -45,10 +45,10 @@ place the Prisma-generated client runs for real. Check the **Actions** tab; if i
 4. **Before deploying**, edit `client/vercel.json`: replace `https://YOUR-API-HOST` in the `connect-src` part of the
    Content-Security-Policy with your API's origin, e.g. `https://YOUR-API.onrender.com`. Commit and push.
    (If you skip this the site loads but every request is blocked — the browser console says *"Refused to connect"*.)
-5. Deploy and copy your site URL, e.g. `https://personal-os.vercel.app`.
+5. Deploy and copy your site URL, e.g. `https://sora.vercel.app`.
 
 ## 4. Point the API at the frontend (CORS)
-Render → your service → **Environment** → set `CLIENT_ORIGIN` to your exact Vercel URL — `https://personal-os.vercel.app`,
+Render → your service → **Environment** → set `CLIENT_ORIGIN` to your exact Vercel URL — `https://sora.vercel.app`,
 **no trailing slash** — and save (it redeploys).
 
 ## 5. Verify

@@ -1,1 +1,1 @@
-export const AUTH_TOKEN_KEY = 'personal-os-token'
+export const AUTH_TOKEN_KEY = 'sora-token'

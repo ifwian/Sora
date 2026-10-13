@@ -32,7 +32,7 @@ export function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm flex flex-col gap-6">
         <div className="text-center">
-          <h1 className="text-xl font-semibold tracking-tight">Personal OS</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Sora</h1>
           <p className="text-sm text-muted mt-1">Create your workspace.</p>
         </div>
 

@@ -72,7 +72,7 @@ export function MobileNav({ drawerOpen, onOpenDrawer, onCloseDrawer }) {
                 className="absolute inset-y-0 left-0 w-72 max-w-[80%] bg-background border-r border-border flex flex-col"
               >
                 <div className="h-14 flex items-center justify-between px-4 border-b border-border">
-                  <span className="text-sm font-semibold tracking-tight">Personal OS</span>
+                  <span className="text-sm font-semibold tracking-tight">Sora</span>
                   <button
                     type="button"
                     onClick={onCloseDrawer}

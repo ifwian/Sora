@@ -6,5 +6,5 @@ process.on('unhandledRejection', (reason) => {
 })
 
 app.listen(env.port, () => {
-  console.log(`Personal OS API listening on http://localhost:${env.port} (${env.nodeEnv})`)
+  console.log(`Sora API listening on http://localhost:${env.port} (${env.nodeEnv})`)
 })

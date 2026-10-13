@@ -47,7 +47,7 @@ export function Sidebar() {
           collapsed ? 'justify-center px-0' : 'justify-between px-4'
         )}
       >
-        {!collapsed && <span className="text-sm font-semibold tracking-tight">Personal OS</span>}
+        {!collapsed && <span className="text-sm font-semibold tracking-tight">Sora</span>}
         <button
           type="button"
           onClick={() => setCollapsed((value) => !value)}
