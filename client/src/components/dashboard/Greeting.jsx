@@ -1,7 +1,7 @@
-function getGreeting(hour) {
-  if (hour < 12) return 'Good morning.'
-  if (hour < 18) return 'Good afternoon.'
-  return 'Good evening.'
+function getGreeting(hour, name) {
+  if (hour < 12) return `Good morning, ${name}.`
+  if (hour < 18) return `Good afternoon, ${name}.`
+  return `Good evening, ${name}.`
 }
 
 /**
@@ -15,9 +15,11 @@ export function Greeting() {
     day: 'numeric',
   }).format(now)
 
+  const name = 'Ian'
+
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight">{getGreeting(now.getHours())}</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{getGreeting(now.getHours(), name)}</h1>
       <p className="text-sm text-muted mt-1">{dateLabel}</p>
     </div>
   )
