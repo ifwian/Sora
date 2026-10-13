@@ -5,6 +5,7 @@ process.env.JWT_SECRET = 'test-secret-that-is-definitely-long-enough-123456'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { test } from 'node:test'
+import { fileURLToPath } from 'node:url'
 import jwt from 'jsonwebtoken'
 
 const { signToken, verifyToken } = await import('../src/utils/jwt.js')
@@ -46,11 +47,15 @@ test('rejects garbage and empty input', () => {
 })
 
 // --- env.js startup checks, run in a child process so each case gets a clean environment
+// fileURLToPath is required here: URL#pathname yields "/D:/..." on Windows, which is not a
+// valid cwd, so spawnSync would fail before env.js ever loaded.
+const SERVER_DIR = fileURLToPath(new URL('..', import.meta.url))
+
 function loadEnv(vars) {
   return spawnSync(
     process.execPath,
     ['--input-type=module', '-e', "const { env } = await import('./src/config/env.js'); console.log(JSON.stringify({ origin: env.clientOrigin, proxy: env.trustProxy }))"],
-    { cwd: new URL('..', import.meta.url).pathname, env: { DATABASE_URL: 'x', ...vars }, encoding: 'utf8' }
+    { cwd: SERVER_DIR, env: { DATABASE_URL: 'x', ...vars }, encoding: 'utf8' }
   )
 }
 
