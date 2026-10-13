@@ -31,6 +31,14 @@ const SOURCES = [
 
 const querySchema = z.string().trim().min(2, 'Type at least 2 characters').max(100)
 
+/**
+ * `contains` becomes a SQL LIKE pattern on PostgreSQL, and Prisma does not escape
+ * it — so a search for "%%" or "_z" would act as a wildcard and match everything
+ * (or the wrong things). Escaping \, % and _ makes them literal. `has` on an
+ * array column is an exact membership test, not a LIKE, so tags use the raw query.
+ */
+const escapeLike = (text) => text.replace(/[\\%_]/g, (char) => `\\${char}`)
+
 /** GET /api/search?q=... — grouped results across every module, scoped to the current user. */
 export const search = asyncHandler(async (req, res) => {
   // Missing or repeated (?q=a&q=b) params are treated as an empty query.
@@ -39,10 +47,11 @@ export const search = asyncHandler(async (req, res) => {
     throw new ApiError(400, parsed.error.issues[0].message)
   }
   const q = parsed.data
+  const needle = escapeLike(q)
 
   const groups = await Promise.all(
     SOURCES.map(async (source) => {
-      const or = source.fields.map((field) => ({ [field]: { contains: q, mode: 'insensitive' } }))
+      const or = source.fields.map((field) => ({ [field]: { contains: needle, mode: 'insensitive' } }))
       if (source.tagField) or.push({ [source.tagField]: { has: q.toLowerCase() } })
 
       const rows = await prisma[source.model].findMany({
