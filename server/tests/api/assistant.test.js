@@ -3,27 +3,33 @@ import http from 'node:http'
 import { after, before, describe, test } from 'node:test'
 import { registerUser, startServer, today } from '../helpers/server.js'
 
-// A stand-in for api.anthropic.com that records what the app sends it.
-function startMockAnthropic() {
+// A stand-in for Google's Gemini API that records what the app sends it.
+function startMockGemini() {
   const received = []
   const server = http.createServer((req, res) => {
     let raw = ''
     req.on('data', (chunk) => (raw += chunk))
     req.on('end', () => {
       const body = JSON.parse(raw || '{}')
-      received.push({ headers: req.headers, body })
-      const last = String(body.messages?.at(-1)?.content ?? '')
+      received.push({ url: req.url, headers: req.headers, body })
+      const last = String(body.contents?.at(-1)?.parts?.[0]?.text ?? '')
       if (last.includes('TRIGGER_FAIL')) {
         res.writeHead(400, { 'content-type': 'application/json' })
-        return res.end(JSON.stringify({ type: 'error', error: { type: 'invalid_request_error', message: 'SECRET-PROVIDER-DETAIL' } }))
+        return res.end(JSON.stringify({ error: { code: 400, status: 'INVALID_ARGUMENT', message: 'SECRET-PROVIDER-DETAIL' } }))
       }
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.end(JSON.stringify({ id: 'msg_1', type: 'message', role: 'assistant', model: body.model, content: [{ type: 'text', text: 'MOCK REPLY' }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 } }))
+      res.end(JSON.stringify({ candidates: [{ index: 0, finishReason: 'STOP', content: { role: 'model', parts: [{ text: 'MOCK REPLY' }] } }] }))
     })
   })
   return new Promise((resolve) =>
     server.listen(0, () => resolve({ received, url: `http://localhost:${server.address().port}`, close: () => { server.closeAllConnections?.(); server.close() } }))
   )
+}
+
+/** The system prompt as the mock received it (Gemini carries it in systemInstruction). */
+function systemOf(sent) {
+  const instruction = sent.body.systemInstruction ?? sent.body.system_instruction
+  return (instruction?.parts ?? []).map((part) => part.text).join('')
 }
 
 describe('assistant', () => {
@@ -32,8 +38,8 @@ describe('assistant', () => {
   const NOTE_SECRET = `ANOTE${Date.now().toString(36)}`
 
   before(async () => {
-    mock = await startMockAnthropic()
-    app = await startServer({ ANTHROPIC_API_KEY: 'test-key-123', ANTHROPIC_BASE_URL: mock.url })
+    mock = await startMockGemini()
+    app = await startServer({ GEMINI_API_KEY: 'test-key-123', GEMINI_BASE_URL: mock.url })
     alice = await registerUser(app.base, 'alice')
     bob = await registerUser(app.base, 'bob')
 
@@ -58,14 +64,31 @@ describe('assistant', () => {
     assert.equal(res.status, 200)
     assert.equal(res.data.reply, 'MOCK REPLY')
     const sent = mock.received.at(-1)
-    assert.equal(sent.headers['x-api-key'], 'test-key-123')
-    assert.equal(sent.body.model, 'claude-sonnet-5-5')
-    assert.equal(sent.body.messages[0].content, 'What should I focus on today?')
+    assert.equal(sent.headers['x-goog-api-key'], 'test-key-123')
+    assert.match(sent.url, /models\/gemini-2\.5-flash:generateContent/)
+    assert.deepEqual(sent.body.contents, [{ role: 'user', parts: [{ text: 'What should I focus on today?' }] }])
+  })
+
+  test('conversation history is sent as role/parts turns, with the assistant side called "model"', async () => {
+    const res = await alice.api.post('/assistant/chat', {
+      today: today(),
+      messages: [
+        { role: 'user', content: 'hi' },
+        { role: 'assistant', content: 'hello!' },
+        { role: 'user', content: 'what is due?' },
+      ],
+    })
+    assert.equal(res.status, 200)
+    assert.deepEqual(mock.received.at(-1).body.contents.map((turn) => [turn.role, turn.parts[0].text]), [
+      ['user', 'hi'],
+      ['model', 'hello!'],
+      ['user', 'what is due?'],
+    ])
   })
 
   test("the prompt contains the user's own data", async () => {
     await ask(alice)
-    const system = mock.received.at(-1).body.system
+    const system = systemOf(mock.received.at(-1))
     assert.match(system, /Finish SQL assignment/)
     assert.match(system, /\[HIGH\]/)
     assert.match(system, /Database Lab/)
@@ -75,7 +98,7 @@ describe('assistant', () => {
 
   test("privacy: nothing from another user, nor notes/memories/email/password hash, is ever sent", async () => {
     await ask(alice)
-    const system = mock.received.at(-1).body.system
+    const system = systemOf(mock.received.at(-1))
     assert.ok(!system.includes(SECRET), "another user's data leaked")
     assert.ok(!system.includes(NOTE_SECRET), 'notes or memories leaked')
     assert.ok(!system.includes(alice.email), 'email leaked')
@@ -84,7 +107,7 @@ describe('assistant', () => {
 
   test('prompt injection: a hostile task title cannot close the data block or start a new line', async () => {
     await ask(alice)
-    const system = mock.received.at(-1).body.system
+    const system = systemOf(mock.received.at(-1))
     const dataBlock = system.slice(system.indexOf('<user_data>'))
     assert.equal((dataBlock.match(/<\/user_data>/g) ?? []).length, 1)
     const line = system.split('\n').find((l) => l.includes('Ignore previous instructions'))

@@ -39,21 +39,28 @@ export const chat = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.userId } })
   const dataBlock = await buildAssistantContext({ userId: req.userId, today, userName: user?.name })
 
-  const genAI = getGenAI()
-  const model = genAI.getGenerativeModel({ model: env.geminiModel })
+  // The system prompt (which carries the user's data summary) goes in systemInstruction. The conversation is sent
+  // as proper {role, parts} turns — Gemini calls the assistant's side "model", not "assistant".
+  const model = getGenAI().getGenerativeModel(
+    { model: env.geminiModel, systemInstruction: systemPrompt(dataBlock) },
+    env.geminiBaseUrl ? { baseUrl: env.geminiBaseUrl } : undefined
+  )
 
-  let response
+  let reply
   try {
-    response = await model.generateContent({
-      systemInstruction: systemPrompt(dataBlock),
-      contents: messages.map(m => `${m.role}: ${m.content}`),
+    const result = await model.generateContent({
+      contents: messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
+      generationConfig: { maxOutputTokens: 1024 },
     })
+    // text() is a method (it throws if the reply was blocked or empty), not a property.
+    reply = result.response.text().trim()
   } catch (error) {
+    // Log the detail server-side; never expose provider errors or keys to the browser.
     console.error('Assistant request failed:', error.message)
     throw new ApiError(502, 'The assistant is unavailable right now. Please try again in a moment.')
   }
 
-  const reply = response.response?.text || 'I couldn't come up with an answer for that.'
+  if (!reply) reply = "I couldn't come up with an answer for that."
 
   res.json({ success: true, data: { reply } })
 })
