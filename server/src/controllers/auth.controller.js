@@ -11,7 +11,7 @@ const SALT_ROUNDS = 10
 const DUMMY_HASH = bcrypt.hashSync('not-a-real-password', SALT_ROUNDS)
 
 function serializeUser(user) {
-  return { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt }
+  return { id: user.id, email: user.email, name: user.name, preferences: user.preferences ?? {}, createdAt: user.createdAt }
 }
 
 /** POST /api/auth/register */
@@ -67,4 +67,16 @@ export const changePassword = asyncHandler(async (req, res) => {
   await prisma.user.update({ where: { id: req.userId }, data: { passwordHash } })
 
   res.json({ success: true, data: null })
+})
+
+/** PATCH /api/auth/preferences — merge appearance settings into the user's saved preferences. */
+export const updatePreferences = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.userId } })
+  if (!user) throw new ApiError(401, 'Invalid or expired session')
+
+  const updated = await prisma.user.update({
+    where: { id: req.userId },
+    data: { preferences: { ...(user.preferences ?? {}), ...req.body } },
+  })
+  res.json({ success: true, data: serializeUser(updated) })
 })
