@@ -30,7 +30,7 @@ place the Prisma-generated client runs for real. Check the **Actions** tab; if i
 |---|---|
 | `DATABASE_URL` | the Neon string from step 1 |
 | `CLIENT_ORIGIN` | leave a placeholder for now (`https://placeholder.vercel.app`) — you'll fix it in step 4 |
-| `ANTHROPIC_API_KEY` | optional; from console.anthropic.com. Leave empty to disable the Assistant. **Set a monthly spend limit there.** |
+| `GEMINI_API_KEY` | optional; from aistudio.google.com/apikey. Leave empty to disable the Assistant. Check your plan's limits and set a budget alert if you're on a paid plan. |
 
    `JWT_SECRET` is generated for you; `TRUST_PROXY=1` and `NODE_ENV=production` are already set.
 3. Deploy. The build runs `prisma generate` and `prisma migrate deploy`, which creates all tables.
@@ -74,7 +74,7 @@ Render → your service → **Environment** → set `CLIENT_ORIGIN` to your exac
 | Pages 404 on refresh | `client/vercel.json` rewrites missing, or Root Directory isn't `client`. |
 
 ## Good to know
-- **Costs:** all of the above has a free tier. The Assistant is the only thing that costs money per use (Anthropic API).
+- **Costs:** all of the above has a free tier. The Assistant is the only thing that costs money per use (Gemini API, depending on your plan).
 - **Backups:** free database tiers have limited history — export important data occasionally.
 - **Railway instead of Render:** create a service from the repo with root `server`, same variables, build command
   `npm ci && npx prisma generate && npx prisma migrate deploy`, start command `npm start`.

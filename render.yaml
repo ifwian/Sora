@@ -22,7 +22,7 @@ services:
         sync: false
       - key: TRUST_PROXY # Render sits behind one proxy; needed for correct per-visitor rate limits
         value: "1"
-      - key: ANTHROPIC_API_KEY # optional — leave empty to disable the Assistant
+      - key: GEMINI_API_KEY # optional — leave empty to disable the Assistant
         sync: false
-      - key: ANTHROPIC_MODEL
-        value: claude-sonnet-5-5
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash

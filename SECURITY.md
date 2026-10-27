@@ -13,7 +13,7 @@ Findings from the Milestone 24 audit: what was checked, what was fixed, and what
 | Input validation | zod on every write. Photo links must be `http(s)://` (rejects `javascript:` / `data:`). |
 | Rate limiting | 300 req / 15 min general; 20 / 15 min on login + register; 40 / 15 min per user on the AI assistant. |
 | Headers / CORS | `helmet`; CORS locked to a single origin (`CLIENT_ORIGIN`); 100 kb body limit. |
-| Errors | One central handler; stack traces are never sent in production; provider (Anthropic) errors are logged server-side only. |
+| Errors | One central handler; stack traces are never sent in production; provider (Google Gemini) errors are logged server-side only. |
 | Secrets | `.env` is git-ignored; no secrets in the repo (scanned across history). In production the server **refuses to start** with a missing, short (<32 chars) or placeholder `JWT_SECRET`. |
 | AI assistant | Read-only (no tools that change data). It only receives summaries scoped to the logged-in user; **notes, memories, places, email and password hash are never sent**. Text from your data is flattened and fenced so a task titled with instructions can't break out of the data block. |
 | Browser hardening | `client/vercel.json` sets a strict Content-Security-Policy (no inline scripts, no framing, connections only to your API), HSTS, `nosniff`, a referrer policy and a permissions policy. |
