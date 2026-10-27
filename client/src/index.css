@@ -236,6 +236,12 @@ body {
   outline-offset: 2px;
 }
 
+/* <main> is focused by code after you navigate (see AppLayout) so screen readers land on the new page.
+   It isn't a control, so it shouldn't draw a ring. (Utility classes lose to this unlayered rule, hence the override.) */
+#main-content:focus-visible {
+  outline: none;
+}
+
 /* Respect the OS "reduce motion" setting: no transitions or spinners-as-animation. */
 @media (prefers-reduced-motion: reduce) {
   *,
