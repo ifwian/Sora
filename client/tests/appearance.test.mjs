@@ -48,6 +48,7 @@ test('pickValidAppearance keeps only known keys holding valid values', () => {
 
 test('resolveAppearance fills the gaps with defaults', () => {
   assert.deepEqual(resolveAppearance({ palette: 'ocean' }), { ...DEFAULT_APPEARANCE, palette: 'ocean' })
+  assert.deepEqual(resolveAppearance({}), DEFAULT_APPEARANCE)
   assert.deepEqual(resolveAppearance(null), DEFAULT_APPEARANCE)
 })
 

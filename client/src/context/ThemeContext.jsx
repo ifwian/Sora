@@ -71,11 +71,9 @@ export function ThemeProvider({ children }) {
     syncRef.current?.(valid)
   }, [])
 
-  /** Settings loaded from the account. Applied without saving them straight back. */
+  /** Settings loaded from the account. The account is authoritative: an empty/partial record is filled with defaults, so a new account never inherits the previous user's look from this device. Applied without saving back. */
   const applyPreferences = useCallback((preferences) => {
-    const valid = pickValidAppearance(preferences)
-    if (Object.keys(valid).length === 0) return
-    setAppearanceState((current) => ({ ...current, ...valid }))
+    setAppearanceState(resolveAppearance(preferences))
   }, [])
 
   const resetAppearance = useCallback(() => setAppearance({ ...DEFAULT_APPEARANCE }), [setAppearance])
