@@ -4,6 +4,8 @@ import { ApiError } from '../utils/ApiError.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { signToken } from '../utils/jwt.js'
 
+import { toDateOnly } from '../utils/serializeDate.js'
+
 const SALT_ROUNDS = 10
 
 // Compared against when the email doesn't exist, so a login for an unknown
@@ -69,14 +71,100 @@ export const changePassword = asyncHandler(async (req, res) => {
   res.json({ success: true, data: null })
 })
 
-/** PATCH /api/auth/preferences — merge appearance settings into the user's saved preferences. */
+/** Recursively merges plain objects so a patch to one settings group doesn't wipe its siblings. Arrays are replaced. */
+function mergePreferences(base, patch) {
+  const isPlain = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+  if (!isPlain(base) || !isPlain(patch)) return patch
+  const merged = { ...base }
+  for (const [key, value] of Object.entries(patch)) {
+    merged[key] = isPlain(value) && isPlain(merged[key]) ? mergePreferences(merged[key], value) : value
+  }
+  return merged
+}
+
+/** GET /api/auth/export — everything the signed-in user owns, as one JSON document. Never includes the password hash. */
+export const exportData = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.userId } })
+  if (!user) throw new ApiError(401, 'Invalid or expired session')
+
+  const [tasks, notes, events, habits, goals, subjects, assignments, sessions, grades, expenses, budgets, games, books, movies, memories, places] =
+    await Promise.all([
+      prisma.task.findMany({ where: { userId: req.userId }, orderBy: { createdAt: 'asc' } }),
+      prisma.note.findMany({ where: { userId: req.userId }, orderBy: { createdAt: 'asc' } }),
+      prisma.event.findMany({ where: { userId: req.userId }, orderBy: { date: 'asc' } }),
+      prisma.habit.findMany({ where: { userId: req.userId }, include: { completions: true }, orderBy: { createdAt: 'asc' } }),
+      prisma.goal.findMany({ where: { userId: req.userId }, include: { milestones: { orderBy: { order: 'asc' } } }, orderBy: { createdAt: 'asc' } }),
+      prisma.subject.findMany({ where: { userId: req.userId }, orderBy: { createdAt: 'asc' } }),
+      prisma.assignment.findMany({ where: { userId: req.userId }, orderBy: { dueDate: 'asc' } }),
+      prisma.studySession.findMany({ where: { userId: req.userId }, orderBy: { date: 'asc' } }),
+      prisma.grade.findMany({ where: { userId: req.userId }, orderBy: { createdAt: 'asc' } }),
+      prisma.expense.findMany({ where: { userId: req.userId }, orderBy: { date: 'asc' } }),
+      prisma.budget.findMany({ where: { userId: req.userId }, orderBy: { month: 'asc' } }),
+      prisma.game.findMany({ where: { userId: req.userId }, orderBy: { createdAt: 'asc' } }),
+      prisma.book.findMany({ where: { userId: req.userId }, orderBy: { createdAt: 'asc' } }),
+      prisma.movie.findMany({ where: { userId: req.userId }, orderBy: { createdAt: 'asc' } }),
+      prisma.memory.findMany({ where: { userId: req.userId }, orderBy: { date: 'asc' } }),
+      prisma.place.findMany({ where: { userId: req.userId }, orderBy: { createdAt: 'asc' } }),
+    ])
+
+  const withDates = (rows, fields) =>
+    rows.map((row) => ({ ...row, ...Object.fromEntries(fields.filter((field) => field in row).map((field) => [field, toDateOnly(row[field])])) }))
+
+  res.json({
+    success: true,
+    data: {
+      format: 'sora-export',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      account: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        preferences: user.preferences ?? {},
+        createdAt: user.createdAt,
+      },
+      tasks: withDates(tasks, ['dueDate']),
+      notes,
+      events: withDates(events, ['date']),
+      habits: habits.map((habit) => ({ ...habit, completions: withDates(habit.completions, ['date']) })),
+      goals: withDates(goals, ['deadline']),
+      study: {
+        subjects,
+        assignments: withDates(assignments, ['dueDate']),
+        sessions: withDates(sessions, ['date']),
+        grades,
+      },
+      finance: {
+        expenses: withDates(expenses, ['date']).map((expense) => ({ ...expense, amount: Number(expense.amount) })),
+        budgets: budgets.map((budget) => ({ ...budget, amount: Number(budget.amount) })),
+      },
+      library: { games, books, movies },
+      memories: withDates(memories, ['date']),
+      places: withDates(places, ['visitedDate']),
+    },
+  })
+})
+
+/** DELETE /api/auth/account — password-confirmed, cascades every row owned by the user. */
+export const deleteAccount = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.userId } })
+  if (!user) throw new ApiError(401, 'Invalid or expired session')
+
+  const passwordMatches = await bcrypt.compare(req.body.password, user.passwordHash)
+  if (!passwordMatches) throw new ApiError(400, 'Password is incorrect')
+
+  await prisma.user.delete({ where: { id: req.userId } })
+  res.json({ success: true, data: null })
+})
+
+/** PATCH /api/auth/preferences — merge settings into the user's saved preferences. */
 export const updatePreferences = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.userId } })
   if (!user) throw new ApiError(401, 'Invalid or expired session')
 
   const updated = await prisma.user.update({
     where: { id: req.userId },
-    data: { preferences: { ...(user.preferences ?? {}), ...req.body } },
+    data: { preferences: mergePreferences(user.preferences ?? {}, req.body) },
   })
   res.json({ success: true, data: serializeUser(updated) })
 })

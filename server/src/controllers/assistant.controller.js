@@ -37,7 +37,7 @@ export const chat = asyncHandler(async (req, res) => {
 
   const { messages, today } = req.body
   const user = await prisma.user.findUnique({ where: { id: req.userId } })
-  const dataBlock = await buildAssistantContext({ userId: req.userId, today, userName: user?.name })
+  const dataBlock = await buildAssistantContext({ userId: req.userId, today, userName: user?.name, preferences: user?.preferences })
 
   // The system prompt (which carries the user's data summary) goes in systemInstruction. The conversation is sent
   // as proper {role, parts} turns — Gemini calls the assistant's side "model", not "assistant".

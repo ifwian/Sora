@@ -48,6 +48,7 @@ describe('assistant', () => {
     await alice.api.post('/notes', { title: NOTE_SECRET, content: NOTE_SECRET })
     await alice.api.post('/memories', { title: NOTE_SECRET, date: today() })
     await alice.api.post('/events', { title: 'Database Lab', date: today(), startTime: '15:00', location: 'Room 204' })
+    await alice.api.post('/finance/expenses', { amount: 42.5, category: 'Books', date: today() })
     await bob.api.post('/tasks', { title: SECRET, priority: 'URGENT', dueDate: today() })
     await bob.api.post('/finance/expenses', { amount: 999, category: SECRET, date: today() })
   })
@@ -137,5 +138,36 @@ describe('assistant', () => {
     assert.equal(res.status, 502)
     assert.ok(!JSON.stringify(res.body).includes('SECRET-PROVIDER-DETAIL'))
     assert.ok(!JSON.stringify(res.body).includes('test-key-123'))
+  })
+
+  test('disabled assistant categories never reach the prompt', async () => {
+    const off = { tasks: false, events: false, habits: false, goals: false, study: false, finance: false }
+    assert.equal((await alice.api.patch('/auth/preferences', { assistant: off })).status, 200)
+
+    await ask(alice)
+    const system = systemOf(mock.received.at(-1))
+    for (const marker of [
+      'Finish SQL assignment',
+      'Database Lab',
+      'OPEN TASKS',
+      'EVENTS (today',
+      'HABITS (last 7 days)',
+      'ACTIVE GOALS',
+      'STUDY DEADLINES',
+      'SPENDING THIS MONTH',
+      'Books',
+    ]) {
+      assert.ok(!system.includes(marker), `disabled category leaked: ${marker}`)
+    }
+    assert.match(system, /TODAY:/)
+
+    // Turning one category back on must expose only that category.
+    assert.equal((await alice.api.patch('/auth/preferences', { assistant: { tasks: true } })).status, 200)
+    await ask(alice)
+    const partial = systemOf(mock.received.at(-1))
+    assert.match(partial, /Finish SQL assignment/)
+    for (const marker of ['Database Lab', 'HABITS (last 7 days)', 'ACTIVE GOALS', 'STUDY DEADLINES', 'SPENDING THIS MONTH']) {
+      assert.ok(!partial.includes(marker), `still-disabled category leaked: ${marker}`)
+    }
   })
 })
