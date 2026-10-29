@@ -39,7 +39,7 @@ describe('assistant', () => {
 
   before(async () => {
     mock = await startMockGemini()
-    app = await startServer({ GEMINI_API_KEY: 'test-key-123', GEMINI_BASE_URL: mock.url })
+    app = await startServer({ GEMINI_API_KEY: 'test-key-123', GEMINI_MODEL: 'gemini-test-model', GEMINI_BASE_URL: mock.url })
     alice = await registerUser(app.base, 'alice')
     bob = await registerUser(app.base, 'bob')
 
@@ -65,7 +65,7 @@ describe('assistant', () => {
     assert.equal(res.data.reply, 'MOCK REPLY')
     const sent = mock.received.at(-1)
     assert.equal(sent.headers['x-goog-api-key'], 'test-key-123')
-    assert.match(sent.url, /models\/gemini-2\.5-flash:generateContent/)
+    assert.match(sent.url, /models\/gemini-test-model:generateContent/)
     assert.deepEqual(sent.body.contents, [{ role: 'user', parts: [{ text: 'What should I focus on today?' }] }])
   })
 

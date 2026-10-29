@@ -34,7 +34,7 @@ export const env = {
   jwtExpiresIn: requireEnv('JWT_EXPIRES_IN', '7d'),
   // Optional — the Assistant is disabled (with a clear message) when no key is set.
   geminiApiKey: process.env.GEMINI_API_KEY || null,
-  geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-3.5-flash',
   // Only for tests: lets the suite point the SDK at a local mock server instead of Google.
   geminiBaseUrl: process.env.GEMINI_BASE_URL || undefined,
   // Number of reverse proxies in front of the API (Render/Railway = 1). Needed so rate limiting

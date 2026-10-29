@@ -130,7 +130,7 @@ Open http://localhost:5173 and create an account. Optionally `npm run db:seed` (
 | `PORT` | no | Default `5000` |
 | `TRUST_PROXY` | production | Set `1` behind Render/Railway so rate limiting sees real visitor IPs |
 | `GEMINI_API_KEY` | no | Enables the Assistant. Without it the page explains how to enable it |
-| `GEMINI_MODEL` | no | Default `gemini-2.5-flash` |
+| `GEMINI_MODEL` | no | Default `gemini-3.5-flash` |
 
 **`client/.env`** — `VITE_API_URL` (default `http://localhost:5000/api`).
 
