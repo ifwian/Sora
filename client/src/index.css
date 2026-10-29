@@ -1,9 +1,23 @@
 @import "tailwindcss";
 
+/* @fontsource bundles — Nunito & Quicksand */
+@font-face {
+  font-family: "Nunito Variable";
+  font-style: normal;
+  font-weight: 400 800;
+  src: url("@fontsource/nunito/variable/fontfile.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Quicksand Variable";
+  font-style: normal;
+  font-weight: 400 700;
+  src: url("@fontsource/quicksand/variable/fontfile.woff2") format("woff2");
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito Variable", "Quicksand Variable", "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
 
   /* Surfaces & text — default (light) values */
   --color-background: #f7f7f5;

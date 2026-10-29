@@ -3,6 +3,7 @@ import { Card } from '../components/common/Card'
 import { Greeting } from '../components/dashboard/Greeting'
 import { QuickActions } from '../components/dashboard/QuickActions'
 import { DayForecastWidget } from '../components/dashboard/DayForecastWidget'
+import { MoodWidget } from '../components/dashboard/MoodWidget'
 import { TasksWidget } from '../components/dashboard/TasksWidget'
 import { UpcomingWidget } from '../components/dashboard/UpcomingWidget'
 import { HabitsWidget } from '../components/dashboard/HabitsWidget'
@@ -55,6 +56,7 @@ export function DashboardPage() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <Greeting />
+        <MoodWidget />
         <QuickActions />
       </div>
 
