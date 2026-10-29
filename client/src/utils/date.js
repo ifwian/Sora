@@ -25,6 +25,24 @@ export function todayISO(timeZone = getRuntimePreferences().timezone) {
   return dateOnlyInZone(new Date(), timeZone)
 }
 
+/** The current clock time in a time zone, as 'HH:MM'. */
+export function timeInZone(date = new Date(), timeZone = getRuntimePreferences().timezone) {
+  const pad = (value) => String(value).padStart(2, '0')
+  if (!timeZone || timeZone === 'system') return `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(date)
+    const value = (type) => parts.find((part) => part.type === type)?.value
+    return `${value('hour')}:${value('minute')}`
+  } catch {
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  }
+}
+
 /** Formats an ISO date ('YYYY-MM-DD') as "Sep 5", "5 Sep" or "2026-09-05". Returns null for falsy input. */
 export function formatShortDate(isoDate, format = getRuntimePreferences().dateFormat) {
   if (!isoDate) return null

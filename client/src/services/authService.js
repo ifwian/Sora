@@ -7,4 +7,8 @@ export const authService = {
   changePassword: (data) => api.patch('/auth/change-password', data),
   /** Saves appearance settings to the account. Returns the updated user. */
   updatePreferences: (patch) => api.patch('/auth/preferences', patch),
+  /** Everything the account owns, as one JSON-safe object. */
+  exportData: () => api.get('/auth/export'),
+  /** Password-confirmed, irreversible account deletion. */
+  deleteAccount: (data) => api.delete('/auth/account', data),
 }

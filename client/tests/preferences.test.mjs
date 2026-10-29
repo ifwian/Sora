@@ -13,10 +13,11 @@ import {
   TIMEZONES,
   TIME_FORMATS,
   WEEK_STARTS,
+  dashboardWidgetsFor,
   resolvePreferences,
   visibleDashboardWidgets,
 } from '../src/constants/preferences.js'
-import { dateOnlyInZone, formatShortDate, formatTime } from '../src/utils/date.js'
+import { dateOnlyInZone, formatShortDate, formatTime, timeInZone } from '../src/utils/date.js'
 import { formatMoney } from '../src/utils/financeUtils.js'
 import { applyRuntimePreferences, resetRuntimePreferences } from '../src/utils/preferencesRuntime.js'
 import { skyPhaseAt, skyPhaseForHour } from '../src/utils/sky.js'
@@ -149,6 +150,40 @@ test('dateOnlyInZone converts the instant into the chosen time zone', () => {
   assert.equal(dateOnlyInZone(instant, 'Asia/Manila'), '2026-09-06')
   assert.equal(dateOnlyInZone(instant, 'America/Los_Angeles'), '2026-09-05')
   assert.equal(dateOnlyInZone(instant, 'Not/AZone'), dateOnlyInZone(instant, 'system'))
+  assert.equal(timeInZone(instant, 'UTC'), '23:30')
+  assert.equal(timeInZone(instant, 'Asia/Manila'), '07:30')
+  assert.equal(timeInZone(new Date('2026-09-05T09:05:00Z'), 'UTC'), '09:05')
+})
+
+test('focus modes narrow the visible dashboard widgets without changing their order', () => {
+  const preferences = resolvePreferences({
+    dashboard: {
+      widgets: [
+        { id: 'finance', visible: true },
+        { id: 'tasks', visible: true },
+        { id: 'notes', visible: true },
+        { id: 'study', visible: true },
+        { id: 'goals', visible: true },
+        { id: 'habits', visible: true },
+        { id: 'upcoming', visible: true },
+        { id: 'forecast', visible: true },
+      ],
+    },
+  })
+
+  assert.deepEqual(dashboardWidgetsFor({ ...preferences, focusMode: 'none' }), [
+    'finance',
+    'tasks',
+    'notes',
+    'study',
+    'goals',
+    'habits',
+    'upcoming',
+    'forecast',
+  ])
+  assert.deepEqual(dashboardWidgetsFor({ ...preferences, focusMode: 'focus' }), ['tasks', 'forecast'])
+  assert.deepEqual(dashboardWidgetsFor({ ...preferences, focusMode: 'study' }), ['tasks', 'study', 'goals', 'forecast'])
+  assert.deepEqual(dashboardWidgetsFor({ ...preferences, focusMode: 'rest' }), ['notes', 'habits', 'upcoming', 'forecast'])
 })
 
 test('sky phases use calm, fixed hour boundaries', () => {

@@ -207,6 +207,21 @@ export function visibleDashboardWidgets(preferences) {
   return preferences.dashboard.widgets.filter((widget) => widget.visible).map((widget) => widget.id)
 }
 
+/** Which widgets each focus mode keeps. null = no extra filtering. */
+export const FOCUS_WIDGETS = {
+  none: null,
+  focus: ['tasks', 'forecast'],
+  study: ['forecast', 'tasks', 'study', 'goals'],
+  rest: ['forecast', 'upcoming', 'habits', 'notes'],
+}
+
+/** The widgets to draw: the account's visible list narrowed by the focus mode. */
+export function dashboardWidgetsFor(preferences) {
+  const visible = visibleDashboardWidgets(preferences)
+  const allowed = FOCUS_WIDGETS[preferences.focusMode]
+  return allowed ? visible.filter((id) => allowed.includes(id)) : visible
+}
+
 /** Lead time in days for a kind of reminder. */
 export function leadDaysFor(preferences, field) {
   const fallback = LEAD_TIME_FIELDS.find((item) => item.id === field)?.defaultDays ?? 0

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useAuth } from './useAuth'
+import { usePreferences } from './usePreferences'
 import { useTasks } from './useTasks'
 import { useEvents } from './useEvents'
 import { useHabits } from './useHabits'
@@ -7,7 +8,7 @@ import { useGoals } from './useGoals'
 import { useStudy } from './useStudy'
 import { useFinance } from './useFinance'
 import { buildNotifications } from '../utils/notificationRules'
-import { todayISO } from '../utils/date'
+import { timeInZone, todayISO } from '../utils/date'
 
 const storageKeyFor = (userId) => `sora-dismissed:${userId}`
 
@@ -29,6 +30,7 @@ function readDismissed(key) {
  */
 export function useNotifications() {
   const { user } = useAuth()
+  const { preferences } = usePreferences()
   const { tasks } = useTasks()
   const { events } = useEvents()
   const { habits } = useHabits()
@@ -36,7 +38,8 @@ export function useNotifications() {
   const { assignments } = useStudy()
   const { expenses, budgets } = useFinance()
 
-  const today = todayISO()
+  const today = todayISO(preferences.timezone)
+  const timeOfDay = timeInZone(new Date(), preferences.timezone)
   const key = storageKeyFor(user.id)
   const [stored, setStored] = useState(() => readDismissed(key))
 
@@ -44,6 +47,7 @@ export function useNotifications() {
     () =>
       buildNotifications({
         today,
+        timeOfDay,
         tasks,
         events,
         habits,
@@ -51,8 +55,22 @@ export function useNotifications() {
         assignments: assignments.items,
         expenses: expenses.items,
         budgets: budgets.items,
+        settings: preferences.notifications,
+        focusMode: preferences.focusMode,
       }),
-    [today, tasks, events, habits, goals, assignments.items, expenses.items, budgets.items]
+    [
+      today,
+      timeOfDay,
+      tasks,
+      events,
+      habits,
+      goals,
+      assignments.items,
+      expenses.items,
+      budgets.items,
+      preferences.notifications,
+      preferences.focusMode,
+    ]
   )
 
   // Dismissals only count for the day they were made.
