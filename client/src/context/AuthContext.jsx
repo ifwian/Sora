@@ -79,9 +79,20 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  /** Saves a settings patch to the account. The response is the authoritative user, so appearance and preferences update together. */
+  const savePreferences = useCallback(
+    async (patch) => {
+      const updated = await authService.updatePreferences(patch)
+      applyPreferences(updated.preferences)
+      setUser(updated)
+      return updated
+    },
+    [applyPreferences]
+  )
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout]
+    () => ({ user, loading, login, register, logout, savePreferences }),
+    [user, loading, login, register, logout, savePreferences]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

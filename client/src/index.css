@@ -190,6 +190,112 @@
   --color-accent-foreground: #0a1824;
 }
 
+/*
+ * Sky — the palette follows the local time of day. The base block is daytime; the
+ * data-sky-phase overrides below shift it through dawn, dusk and night. Each phase
+ * has a dark variant that sets every token its light variant sets (contrast tests
+ * cover all eight combinations).
+ */
+[data-palette='sky'] {
+  --color-background: #f1f7fd;
+  --color-surface: #fafdff;
+  --color-surface-hover: #e5eff9;
+  --color-border: #d4e4f3;
+  --color-control: #7a8b9c;
+  --color-foreground: #17222d;
+  --color-muted: #556575;
+  --color-accent: #2f6bb0;
+  --color-accent-hover: #26578f;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-palette='sky'] {
+  --color-background: #0e1722;
+  --color-surface: #151f2c;
+  --color-surface-hover: #1c2938;
+  --color-border: #283848;
+  --color-control: #637a8e;
+  --color-foreground: #e4eef7;
+  --color-muted: #9fb3c4;
+  --color-accent: #82b8ec;
+  --color-accent-hover: #9cc8f3;
+  --color-accent-foreground: #081724;
+}
+
+[data-sky-phase='dawn'][data-palette='sky'] {
+  --color-background: #fbf4f6;
+  --color-surface: #fffafc;
+  --color-surface-hover: #f8eaef;
+  --color-border: #eedbe4;
+  --color-control: #8d7b86;
+  --color-foreground: #2b2126;
+  --color-muted: #6d5a63;
+  --color-accent: #9a4a6d;
+  --color-accent-hover: #843d5c;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-sky-phase='dawn'][data-palette='sky'] {
+  --color-background: #1a1318;
+  --color-surface: #231a20;
+  --color-surface-hover: #2c2128;
+  --color-border: #3a2b33;
+  --color-control: #7d6b76;
+  --color-foreground: #f3e7ec;
+  --color-muted: #b7a3ad;
+  --color-accent: #e39ab5;
+  --color-accent-hover: #eeadc4;
+  --color-accent-foreground: #2a0f19;
+}
+
+[data-sky-phase='dusk'][data-palette='sky'] {
+  --color-background: #fbf3f2;
+  --color-surface: #fffaf9;
+  --color-surface-hover: #f9e8e4;
+  --color-border: #efd9d3;
+  --color-control: #8f7b74;
+  --color-foreground: #2b211e;
+  --color-muted: #6d5c56;
+  --color-accent: #a55238;
+  --color-accent-hover: #8d432c;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-sky-phase='dusk'][data-palette='sky'] {
+  --color-background: #1a1311;
+  --color-surface: #231a17;
+  --color-surface-hover: #2c211d;
+  --color-border: #3a2c26;
+  --color-control: #7d6a62;
+  --color-foreground: #f5e9e4;
+  --color-muted: #b8a49b;
+  --color-accent: #eda182;
+  --color-accent-hover: #f4b39a;
+  --color-accent-foreground: #2a130a;
+}
+
+[data-sky-phase='night'][data-palette='sky'] {
+  --color-background: #f4f4fb;
+  --color-surface: #fbfbff;
+  --color-surface-hover: #eaeaf6;
+  --color-border: #dcdcf0;
+  --color-control: #84839c;
+  --color-foreground: #202030;
+  --color-muted: #5f5f78;
+  --color-accent: #4f53a8;
+  --color-accent-hover: #40448c;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-sky-phase='night'][data-palette='sky'] {
+  --color-background: #101019;
+  --color-surface: #181824;
+  --color-surface-hover: #202030;
+  --color-border: #2b2b3c;
+  --color-control: #6e6e88;
+  --color-foreground: #ececf5;
+  --color-muted: #a8a8c2;
+  --color-accent: #a3a6ef;
+  --color-accent-hover: #b8baf5;
+  --color-accent-foreground: #12122b;
+}
+
 /* Shape: corner roundness. "soft" is the default (the values in @theme). */
 [data-radius='crisp'] {
   --radius-sm: 3px;

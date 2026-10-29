@@ -36,7 +36,7 @@ export const TIMEZONES = [
 ]
 
 export const WEEK_STARTS = ['sunday', 'monday']
-export const CURRENCY_SYMBOLS = ['$', '€', '£', '¥', '₱', '₹', '₩', '₺', 'R$', 'A$', 'C$', 'CHF', 'kr']
+export const CURRENCY_SYMBOLS = ['', '$', '€', '£', '¥', '₱', '₹', '₩', '₺', 'R$', 'A$', 'C$', 'CHF', 'kr']
 export const DATE_FORMATS = ['mdy', 'dmy', 'iso']
 export const TIME_FORMATS = ['12h', '24h']
 export const FOCUS_MODES = ['none', 'focus', 'study', 'rest']

@@ -11,6 +11,10 @@
     if (saved.palette) root.dataset.palette = saved.palette
     if (saved.radius) root.dataset.radius = saved.radius
     if (saved.textSize) root.dataset.text = saved.textSize
+    // Sky shifts with local time. The account's time zone refines this after /me.
+    var hour = new Date().getHours()
+    root.dataset.skyPhase =
+      hour >= 5 && hour < 9 ? 'dawn' : hour >= 9 && hour < 17 ? 'day' : hour >= 17 && hour < 20 ? 'dusk' : 'night'
   } catch {
     /* storage blocked or corrupt — fall back to the default look */
   }

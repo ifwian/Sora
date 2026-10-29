@@ -10,6 +10,7 @@ export const PALETTES = [
   { id: 'lavender', label: 'Lavender', blurb: 'Dreamy lilac' },
   { id: 'peach', label: 'Peach', blurb: 'Warm cream' },
   { id: 'ocean', label: 'Ocean', blurb: 'Pale sky' },
+  { id: 'sky', label: 'Sky', blurb: 'Follows the day' },
 ]
 
 export const MODES = [

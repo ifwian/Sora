@@ -140,6 +140,22 @@ describe('assistant', () => {
     assert.ok(!JSON.stringify(res.body).includes('test-key-123'))
   })
 
+  test('a chosen time zone adds the local time of day, and the device zone omits it', async () => {
+    assert.equal((await alice.api.patch('/auth/preferences', { timezone: 'Asia/Manila' })).status, 200)
+    await ask(alice)
+    assert.match(systemOf(mock.received.at(-1)), /TIME OF DAY: (dawn|day|dusk|night) \(Asia\/Manila\)/)
+
+    assert.equal((await alice.api.patch('/auth/preferences', { timezone: 'system' })).status, 200)
+    await ask(alice)
+    assert.doesNotMatch(systemOf(mock.received.at(-1)), /TIME OF DAY/)
+  })
+
+  test('the prompt uses the saved currency symbol', async () => {
+    assert.equal((await alice.api.patch('/auth/preferences', { currencySymbol: '₱' })).status, 200)
+    await ask(alice)
+    assert.match(systemOf(mock.received.at(-1)), /Amounts are in "₱"/)
+  })
+
   test('disabled assistant categories never reach the prompt', async () => {
     const off = { tasks: false, events: false, habits: false, goals: false, study: false, finance: false }
     assert.equal((await alice.api.patch('/auth/preferences', { assistant: off })).status, 200)

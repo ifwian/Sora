@@ -37,6 +37,28 @@ for (const id of paletteIds) {
   themes.push({ name: id, mode: 'dark', tokens: { ...baseLight, ...baseDark, ...pLight, ...(pDark ?? {}) } })
 }
 
+// Sky has an extra dimension: dawn/day/dusk/night. Day is the base sky block; the
+// other phases must stand on their own in both modes.
+const skyPhases = [...blocks.keys()]
+  .map((selector) => selector.match(/^\[data-sky-phase='([\w-]+)'\]\[data-palette='sky'\]$/)?.[1])
+  .filter(Boolean)
+const skyBase = blocks.get("[data-palette='sky']")
+assert.ok(skyBase, 'missing the base sky palette block')
+for (const phase of skyPhases) {
+  const pLight = blocks.get(`[data-sky-phase='${phase}'][data-palette='sky']`)
+  const pDark = blocks.get(`.dark[data-sky-phase='${phase}'][data-palette='sky']`)
+  test(`sky phase ${phase}: has a dark variant that overrides every colour its light variant sets`, () => {
+    assert.ok(pDark, `missing .dark[data-sky-phase='${phase}'][data-palette='sky'] block`)
+    const missing = Object.keys(pLight).filter((key) => !(key in pDark))
+    assert.deepEqual(missing, [], `sky ${phase} dark mode would inherit light-mode values for: ${missing.join(', ')}`)
+  })
+  themes.push({ name: `sky / ${phase}`, mode: 'light', tokens: { ...baseLight, ...pLight } })
+  themes.push({ name: `sky / ${phase}`, mode: 'dark', tokens: { ...baseLight, ...baseDark, ...pLight, ...(pDark ?? {}) } })
+}
+test('sky has all four phases (day is the base block)', () => {
+  assert.deepEqual(skyPhases.sort(), ['dawn', 'dusk', 'night'])
+})
+
 const lum = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
   return 0.2126 * r + 0.7152 * g + 0.0722 * b

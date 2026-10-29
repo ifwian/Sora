@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma.js'
 import { fromDateOnly, toDateOnly } from '../utils/serializeDate.js'
+import { skyPhaseAt } from '../utils/skyPhase.js'
 
 const MAX_TASKS = 40
 
@@ -68,6 +69,8 @@ export async function buildAssistantContext({ userId, today, userName, preferenc
   const lines = []
 
   lines.push(`TODAY: ${today} (${weekday(today)})`)
+  const phase = skyPhaseAt(new Date(), preferences?.timezone)
+  if (phase) lines.push(`TIME OF DAY: ${phase} (${preferences.timezone})`)
   if (userName) lines.push(`USER'S NAME: ${clean(userName, 60)}`)
 
   // Tasks
