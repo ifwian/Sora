@@ -1,9 +1,23 @@
 @import "tailwindcss";
 
+/* @fontsource bundles — Nunito & Quicksand */
+@font-face {
+  font-family: "Nunito Variable";
+  font-style: normal;
+  font-weight: 400 800;
+  src: url("@fontsource/nunito/variable/fontfile.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Quicksand Variable";
+  font-style: normal;
+  font-weight: 400 700;
+  src: url("@fontsource/quicksand/variable/fontfile.woff2") format("woff2");
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito Variable", "Quicksand Variable", "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
 
   /* Surfaces & text — default (light) values */
   --color-background: #f7f7f5;
@@ -59,6 +73,263 @@
   --color-danger-bg: #271616;
 }
 
+/*
+ * Palettes. Each one overrides the same colour tokens, once for light and once for dark
+ * (the dark block must set every token the light block sets — tests/contrast.test.mjs enforces
+ * that, and checks WCAG contrast for every palette in both modes). "sora" is the default and has
+ * no block of its own. Status colours (success/warning/danger) are shared by all palettes.
+ */
+[data-palette='sakura'] {
+  --color-background: #fbf3f4;
+  --color-surface: #fffafb;
+  --color-surface-hover: #f6e9eb;
+  --color-border: #ecd9dc;
+  --color-control: #8f7d80;
+  --color-foreground: #2a1f22;
+  --color-muted: #6f5d62;
+  --color-accent: #b0405a;
+  --color-accent-hover: #96324a;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-palette='sakura'] {
+  --color-background: #1a1315;
+  --color-surface: #231a1d;
+  --color-surface-hover: #2c2125;
+  --color-border: #3a2c30;
+  --color-control: #7d6a6f;
+  --color-foreground: #f3e8ea;
+  --color-muted: #b3a0a5;
+  --color-accent: #e58fa5;
+  --color-accent-hover: #efa8ba;
+  --color-accent-foreground: #2a0f17;
+}
+
+[data-palette='matcha'] {
+  --color-background: #f4f7f1;
+  --color-surface: #fbfdf9;
+  --color-surface-hover: #e9f0e3;
+  --color-border: #d9e3d1;
+  --color-control: #7f8a78;
+  --color-foreground: #1d241b;
+  --color-muted: #5c6657;
+  --color-accent: #397236;
+  --color-accent-hover: #2f5e2c;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-palette='matcha'] {
+  --color-background: #121612;
+  --color-surface: #1a201a;
+  --color-surface-hover: #222922;
+  --color-border: #2d362d;
+  --color-control: #6a7568;
+  --color-foreground: #e8eee4;
+  --color-muted: #a1ad9d;
+  --color-accent: #8cc784;
+  --color-accent-hover: #a3d49c;
+  --color-accent-foreground: #0e1a0c;
+}
+
+[data-palette='lavender'] {
+  --color-background: #f6f4fb;
+  --color-surface: #fcfbff;
+  --color-surface-hover: #ece8f6;
+  --color-border: #ddd7ec;
+  --color-control: #85809a;
+  --color-foreground: #211e2b;
+  --color-muted: #625d75;
+  --color-accent: #6a4fb0;
+  --color-accent-hover: #573f96;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-palette='lavender'] {
+  --color-background: #151320;
+  --color-surface: #1d1a2a;
+  --color-surface-hover: #262237;
+  --color-border: #342f47;
+  --color-control: #716b88;
+  --color-foreground: #ece9f5;
+  --color-muted: #aaa4c0;
+  --color-accent: #b4a0ee;
+  --color-accent-hover: #c5b6f5;
+  --color-accent-foreground: #1a1030;
+}
+
+[data-palette='peach'] {
+  --color-background: #fdf5ee;
+  --color-surface: #fffaf5;
+  --color-surface-hover: #f8e8da;
+  --color-border: #efdccb;
+  --color-control: #8d7b6d;
+  --color-foreground: #2a201a;
+  --color-muted: #6c5b4f;
+  --color-accent: #a84a26;
+  --color-accent-hover: #8f3f20;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-palette='peach'] {
+  --color-background: #1a1411;
+  --color-surface: #231b17;
+  --color-surface-hover: #2c221d;
+  --color-border: #3a2d26;
+  --color-control: #7c6a5e;
+  --color-foreground: #f4e9e1;
+  --color-muted: #b5a396;
+  --color-accent: #f0a07a;
+  --color-accent-hover: #f5b394;
+  --color-accent-foreground: #2a1208;
+}
+
+[data-palette='ocean'] {
+  --color-background: #f1f7fb;
+  --color-surface: #fafdff;
+  --color-surface-hover: #e4eff7;
+  --color-border: #d3e3ef;
+  --color-control: #7a8b99;
+  --color-foreground: #16222b;
+  --color-muted: #546572;
+  --color-accent: #2866a8;
+  --color-accent-hover: #1f5287;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-palette='ocean'] {
+  --color-background: #0f171d;
+  --color-surface: #162029;
+  --color-surface-hover: #1d2a35;
+  --color-border: #283845;
+  --color-control: #62788a;
+  --color-foreground: #e3edf4;
+  --color-muted: #9fb2c1;
+  --color-accent: #7db4e8;
+  --color-accent-hover: #98c4ee;
+  --color-accent-foreground: #0a1824;
+}
+
+/*
+ * Sky — the palette follows the local time of day. The base block is daytime; the
+ * data-sky-phase overrides below shift it through dawn, dusk and night. Each phase
+ * has a dark variant that sets every token its light variant sets (contrast tests
+ * cover all eight combinations).
+ */
+[data-palette='sky'] {
+  --color-background: #f1f7fd;
+  --color-surface: #fafdff;
+  --color-surface-hover: #e5eff9;
+  --color-border: #d4e4f3;
+  --color-control: #7a8b9c;
+  --color-foreground: #17222d;
+  --color-muted: #556575;
+  --color-accent: #2f6bb0;
+  --color-accent-hover: #26578f;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-palette='sky'] {
+  --color-background: #0e1722;
+  --color-surface: #151f2c;
+  --color-surface-hover: #1c2938;
+  --color-border: #283848;
+  --color-control: #637a8e;
+  --color-foreground: #e4eef7;
+  --color-muted: #9fb3c4;
+  --color-accent: #82b8ec;
+  --color-accent-hover: #9cc8f3;
+  --color-accent-foreground: #081724;
+}
+
+[data-sky-phase='dawn'][data-palette='sky'] {
+  --color-background: #fbf4f6;
+  --color-surface: #fffafc;
+  --color-surface-hover: #f8eaef;
+  --color-border: #eedbe4;
+  --color-control: #8d7b86;
+  --color-foreground: #2b2126;
+  --color-muted: #6d5a63;
+  --color-accent: #9a4a6d;
+  --color-accent-hover: #843d5c;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-sky-phase='dawn'][data-palette='sky'] {
+  --color-background: #1a1318;
+  --color-surface: #231a20;
+  --color-surface-hover: #2c2128;
+  --color-border: #3a2b33;
+  --color-control: #7d6b76;
+  --color-foreground: #f3e7ec;
+  --color-muted: #b7a3ad;
+  --color-accent: #e39ab5;
+  --color-accent-hover: #eeadc4;
+  --color-accent-foreground: #2a0f19;
+}
+
+[data-sky-phase='dusk'][data-palette='sky'] {
+  --color-background: #fbf3f2;
+  --color-surface: #fffaf9;
+  --color-surface-hover: #f9e8e4;
+  --color-border: #efd9d3;
+  --color-control: #8f7b74;
+  --color-foreground: #2b211e;
+  --color-muted: #6d5c56;
+  --color-accent: #a55238;
+  --color-accent-hover: #8d432c;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-sky-phase='dusk'][data-palette='sky'] {
+  --color-background: #1a1311;
+  --color-surface: #231a17;
+  --color-surface-hover: #2c211d;
+  --color-border: #3a2c26;
+  --color-control: #7d6a62;
+  --color-foreground: #f5e9e4;
+  --color-muted: #b8a49b;
+  --color-accent: #eda182;
+  --color-accent-hover: #f4b39a;
+  --color-accent-foreground: #2a130a;
+}
+
+[data-sky-phase='night'][data-palette='sky'] {
+  --color-background: #f4f4fb;
+  --color-surface: #fbfbff;
+  --color-surface-hover: #eaeaf6;
+  --color-border: #dcdcf0;
+  --color-control: #84839c;
+  --color-foreground: #202030;
+  --color-muted: #5f5f78;
+  --color-accent: #4f53a8;
+  --color-accent-hover: #40448c;
+  --color-accent-foreground: #ffffff;
+}
+.dark[data-sky-phase='night'][data-palette='sky'] {
+  --color-background: #101019;
+  --color-surface: #181824;
+  --color-surface-hover: #202030;
+  --color-border: #2b2b3c;
+  --color-control: #6e6e88;
+  --color-foreground: #ececf5;
+  --color-muted: #a8a8c2;
+  --color-accent: #a3a6ef;
+  --color-accent-hover: #b8baf5;
+  --color-accent-foreground: #12122b;
+}
+
+/* Shape: corner roundness. "soft" is the default (the values in @theme). */
+[data-radius='crisp'] {
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+}
+[data-radius='round'] {
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+}
+
+/* Text size. Everything is sized in rem, so changing the root size scales the whole interface. */
+html[data-text='small'] {
+  font-size: 15px;
+}
+html[data-text='large'] {
+  font-size: 17.5px;
+}
+
 :root {
   color-scheme: light dark;
 }
@@ -83,6 +354,12 @@ body {
 *:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+/* <main> is focused by code after you navigate (see AppLayout) so screen readers land on the new page.
+   It isn't a control, so it shouldn't draw a ring. (Utility classes lose to this unlayered rule, hence the override.) */
+#main-content:focus-visible {
+  outline: none;
 }
 
 /* Respect the OS "reduce motion" setting: no transitions or spinners-as-animation. */

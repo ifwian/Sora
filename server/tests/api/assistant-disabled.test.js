@@ -6,7 +6,7 @@ describe('assistant without an API key', () => {
   let app, alice
 
   before(async () => {
-    app = await startServer({ ANTHROPIC_API_KEY: '' })
+    app = await startServer({ GEMINI_API_KEY: '' })
     alice = await registerUser(app.base, 'alice')
   })
   after(() => app.close())
@@ -14,6 +14,6 @@ describe('assistant without an API key', () => {
   test('responds with a clear setup message (503), not a crash', async () => {
     const res = await alice.api.post('/assistant/chat', { today: today(), messages: [{ role: 'user', content: 'hi' }] })
     assert.equal(res.status, 503)
-    assert.match(res.body.message, /ANTHROPIC_API_KEY/)
+    assert.match(res.body.message, /GEMINI_API_KEY/)
   })
 })

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { buildNotifications, dayDiff } from '../src/utils/notificationRules.js'
+import { buildNotifications, dayDiff, isQuietHours } from '../src/utils/notificationRules.js'
 
 const today = '2026-10-09'
 
@@ -92,4 +92,80 @@ test('ordering: danger before warning before info', () => {
     tasks: [{ id: 'a', title: 'T', status: 'TODO', dueDate: today }, { id: 'b', title: 'O', status: 'TODO', dueDate: '2026-10-01' }],
   })
   assert.deepEqual(n.map((x) => x.severity), ['danger', 'warning', 'info'])
+})
+
+const allData = {
+  tasks: [{ id: 't', title: 'Task', status: 'TODO', dueDate: today }],
+  events: [{ id: 'e', title: 'Event', date: today }],
+  goals: [{ id: 'g', title: 'Goal', deadline: today, completed: false }],
+  assignments: [{ id: 'a', title: 'Exam', kind: 'EXAM', dueDate: today, completed: false }],
+  budgets: [{ month: '2026-10', amount: 100 }],
+  expenses: [{ date: today, amount: 100 }],
+}
+
+test('notification types can be turned off independently', () => {
+  const noTasks = buildNotifications({
+    today,
+    ...allData,
+    settings: { types: { tasks: false }, leadDays: {}, quietHours: { enabled: false } },
+  })
+  assert.equal(noTasks.some((n) => n.id.startsWith('task-')), false)
+  assert.equal(noTasks.some((n) => n.id.startsWith('event:')), true)
+
+  const nothing = buildNotifications({
+    today,
+    ...allData,
+    settings: { types: { tasks: false, events: false, study: false, goals: false, habits: false, finance: false } },
+  })
+  assert.deepEqual(nothing, [])
+})
+
+test('lead times widen the reminder window', () => {
+  const tasks = [{ id: 'later', title: 'Later', status: 'TODO', dueDate: '2026-10-12' }]
+  const events = [{ id: 'later', title: 'Later', date: '2026-10-12' }]
+  const goals = [{ id: 'later', title: 'Later', deadline: '2026-10-19', completed: false }]
+  const assignments = [{ id: 'later', title: 'Later', kind: 'ASSIGNMENT', dueDate: '2026-10-13', completed: false }]
+
+  // Each of these sits just outside its default window (tasks/events 1 day,
+  // assignments 3 days, goals 7 days).
+  for (const data of [{ tasks }, { events }, { goals }, { assignments }]) {
+    assert.deepEqual(buildNotifications({ today, ...data }), [])
+  }
+
+  const settings = { leadDays: { tasks: 3, events: 3, goals: 10, assignments: 4, exams: 7 } }
+  assert.equal(buildNotifications({ today, tasks, settings })[0].id, 'task-soon:later')
+  assert.equal(buildNotifications({ today, events, settings })[0].id, 'event:later')
+  assert.equal(buildNotifications({ today, goals, settings }).length, 1)
+  assert.equal(buildNotifications({ today, assignments, settings }).length, 1)
+})
+
+test('quiet hours silence reminders, including overnight windows', () => {
+  assert.equal(isQuietHours({ enabled: true, start: '22:00', end: '07:00' }, '23:30'), true)
+  assert.equal(isQuietHours({ enabled: true, start: '22:00', end: '07:00' }, '06:59'), true)
+  assert.equal(isQuietHours({ enabled: true, start: '22:00', end: '07:00' }, '07:00'), false)
+  assert.equal(isQuietHours({ enabled: true, start: '22:00', end: '07:00' }, '12:00'), false)
+  assert.equal(isQuietHours({ enabled: false, start: '22:00', end: '07:00' }, '23:30'), false)
+  assert.equal(isQuietHours({ enabled: true, start: '25:00', end: '07:00' }, '23:30'), false)
+  assert.equal(isQuietHours({ enabled: true, start: '09:00', end: '17:00' }, '12:00'), true)
+  assert.equal(isQuietHours({ enabled: true, start: '09:00', end: '17:00' }, '17:00'), false)
+
+  const quiet = { enabled: true, start: '22:00', end: '07:00' }
+  assert.deepEqual(buildNotifications({ today, ...allData, timeOfDay: '23:30', settings: { quietHours: quiet } }), [])
+  assert.equal(buildNotifications({ today, ...allData, timeOfDay: '12:00', settings: { quietHours: quiet } }).length, 5)
+  assert.equal(buildNotifications({ today, ...allData, settings: { quietHours: quiet } }).length, 5, 'without a clock time, quiet hours are not assumed')
+})
+
+test('focus modes keep only their reminder types', () => {
+  const ids = (focusMode) => buildNotifications({ today, ...allData, focusMode }).map((n) => n.id)
+
+  assert.deepEqual(ids('focus'), ['task-today:t'])
+  assert.deepEqual(ids('study').sort(), ['goal:g', 'study:a', 'task-today:t'])
+  assert.deepEqual(ids('rest'), ['event:e'])
+  assert.equal(ids('none').length, 5)
+})
+
+test('focus mode does not surface tasks that are merely upcoming', () => {
+  const tasks = [{ id: 'tomorrow', title: 'Tomorrow', status: 'TODO', dueDate: '2026-10-10' }]
+  assert.equal(buildNotifications({ today, tasks }).length, 1)
+  assert.deepEqual(buildNotifications({ today, tasks, focusMode: 'focus' }), [])
 })

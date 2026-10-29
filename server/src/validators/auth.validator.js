@@ -15,3 +15,7 @@ export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
   newPassword: z.string().min(8, 'New password must be at least 8 characters').max(72),
 })
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, 'Password is required'),
+})

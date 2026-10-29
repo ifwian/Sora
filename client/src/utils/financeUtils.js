@@ -1,8 +1,13 @@
-import { CURRENCY_SYMBOL } from '../constants/finance'
-import { todayISO } from './date'
+import { getRuntimePreferences } from './preferencesRuntime.js'
+import { todayISO } from './date.js'
 
-export function formatMoney(amount) {
-  return `${CURRENCY_SYMBOL}${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+/** Currency prefixes that read better with a space, e.g. "CHF 12.00". */
+const SPACED_SYMBOLS = new Set(['CHF'])
+
+export function formatMoney(amount, symbol = getRuntimePreferences().currencySymbol) {
+  const value = Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  if (!symbol) return value
+  return `${symbol}${SPACED_SYMBOLS.has(symbol) ? ' ' : ''}${value}`
 }
 
 export function currentMonthKey() {

@@ -1,7 +1,8 @@
 import { Router } from 'express'
 import rateLimit from 'express-rate-limit'
-import { register, login, getMe, changePassword } from '../controllers/auth.controller.js'
-import { registerSchema, loginSchema, changePasswordSchema } from '../validators/auth.validator.js'
+import { register, login, getMe, changePassword, updatePreferences, exportData, deleteAccount } from '../controllers/auth.controller.js'
+import { registerSchema, loginSchema, changePasswordSchema, deleteAccountSchema } from '../validators/auth.validator.js'
+import { preferencesSchema } from '../validators/preferences.validator.js'
 import { validateBody } from '../middleware/validate.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 
@@ -19,6 +20,9 @@ const authLimiter = rateLimit({
 router.post('/register', authLimiter, validateBody(registerSchema), register)
 router.post('/login', authLimiter, validateBody(loginSchema), login)
 router.get('/me', requireAuth, getMe)
+router.get('/export', requireAuth, exportData)
+router.patch('/preferences', requireAuth, validateBody(preferencesSchema), updatePreferences)
 router.patch('/change-password', requireAuth, validateBody(changePasswordSchema), changePassword)
+router.delete('/account', authLimiter, requireAuth, validateBody(deleteAccountSchema), deleteAccount)
 
 export default router

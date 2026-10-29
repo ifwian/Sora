@@ -1,13 +1,63 @@
-// Guards the design tokens: every text/background pairing must meet WCAG AA
-// in BOTH themes, and interactive-control borders must hit 3:1 (WCAG 1.4.11).
+// Guards the design tokens. For the default theme AND every palette, in BOTH light and dark:
+// every text/background pairing must meet WCAG AA, and interactive-control borders must hit 3:1 (WCAG 1.4.11).
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { test } from 'node:test'
 
-const css = fs.readFileSync(new URL('../src/index.css', import.meta.url), 'utf8')
-const grab = (block) => Object.fromEntries([...block.matchAll(/--color-([\w-]+):\s*(#[0-9a-fA-F]{6})/g)].map((m) => [m[1], m[2]]))
-const light = grab(css.slice(css.indexOf('@theme'), css.indexOf('.dark {')))
-const dark = { ...light, ...grab(css.slice(css.indexOf('.dark {'), css.indexOf(':root {'))) }
+const css = fs.readFileSync(new URL('../src/index.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+
+// selector -> { token: '#hex' } for every block that sets colour tokens
+const blocks = new Map()
+for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+  const tokens = Object.fromEntries([...body.matchAll(/--color-([\w-]+):\s*(#[0-9a-fA-F]{6})/g)].map((m) => [m[1], m[2]]))
+  // a block's selector is only the text after the previous ';' (so @import / @custom-variant lines don't leak in)
+  if (Object.keys(tokens).length > 0) blocks.set(selector.split(';').pop().trim().replace(/"/g, "'"), tokens)
+}
+
+const baseLight = blocks.get('@theme')
+const baseDark = blocks.get('.dark')
+assert.ok(baseLight && baseDark, 'index.css must define @theme and .dark colour blocks')
+
+const paletteIds = [...blocks.keys()].map((s) => s.match(/^\[data-palette='([\w-]+)'\]$/)?.[1]).filter(Boolean)
+
+// The browser cascades: base light -> .dark -> palette light -> .dark[palette]. (Higher specificity wins last.)
+const themes = [
+  { name: 'sora (default)', mode: 'light', tokens: baseLight },
+  { name: 'sora (default)', mode: 'dark', tokens: { ...baseLight, ...baseDark } },
+]
+for (const id of paletteIds) {
+  const pLight = blocks.get(`[data-palette='${id}']`)
+  const pDark = blocks.get(`.dark[data-palette='${id}']`)
+  test(`palette ${id}: has a dark variant that overrides every colour its light variant sets`, () => {
+    assert.ok(pDark, `missing .dark[data-palette='${id}'] block`)
+    const missing = Object.keys(pLight).filter((key) => !(key in pDark))
+    assert.deepEqual(missing, [], `${id} dark mode would inherit light-mode values for: ${missing.join(', ')}`)
+  })
+  themes.push({ name: id, mode: 'light', tokens: { ...baseLight, ...pLight } })
+  themes.push({ name: id, mode: 'dark', tokens: { ...baseLight, ...baseDark, ...pLight, ...(pDark ?? {}) } })
+}
+
+// Sky has an extra dimension: dawn/day/dusk/night. Day is the base sky block; the
+// other phases must stand on their own in both modes.
+const skyPhases = [...blocks.keys()]
+  .map((selector) => selector.match(/^\[data-sky-phase='([\w-]+)'\]\[data-palette='sky'\]$/)?.[1])
+  .filter(Boolean)
+const skyBase = blocks.get("[data-palette='sky']")
+assert.ok(skyBase, 'missing the base sky palette block')
+for (const phase of skyPhases) {
+  const pLight = blocks.get(`[data-sky-phase='${phase}'][data-palette='sky']`)
+  const pDark = blocks.get(`.dark[data-sky-phase='${phase}'][data-palette='sky']`)
+  test(`sky phase ${phase}: has a dark variant that overrides every colour its light variant sets`, () => {
+    assert.ok(pDark, `missing .dark[data-sky-phase='${phase}'][data-palette='sky'] block`)
+    const missing = Object.keys(pLight).filter((key) => !(key in pDark))
+    assert.deepEqual(missing, [], `sky ${phase} dark mode would inherit light-mode values for: ${missing.join(', ')}`)
+  })
+  themes.push({ name: `sky / ${phase}`, mode: 'light', tokens: { ...baseLight, ...pLight } })
+  themes.push({ name: `sky / ${phase}`, mode: 'dark', tokens: { ...baseLight, ...baseDark, ...pLight, ...(pDark ?? {}) } })
+}
+test('sky has all four phases (day is the base block)', () => {
+  assert.deepEqual(skyPhases.sort(), ['dawn', 'dusk', 'night'])
+})
 
 const lum = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
@@ -44,16 +94,20 @@ const pairs = [
   ['control border vs hover bg', 'control', 'surface-hover', UI],
 ]
 
-for (const [themeName, theme] of [['light', light], ['dark', dark]]) {
+for (const { name, mode, tokens } of themes) {
   for (const [label, fg, bg, min] of pairs) {
-    test(`${themeName}: ${label} ≥ ${min}:1`, () => {
-      assert.ok(theme[fg] && theme[bg], `missing token for ${fg} or ${bg}`)
-      const r = ratio(theme[fg], theme[bg])
-      assert.ok(r >= min, `${fg} ${theme[fg]} on ${bg} ${theme[bg]} is ${r.toFixed(2)}:1, needs ${min}:1`)
+    test(`${name} / ${mode}: ${label} ≥ ${min}:1`, () => {
+      assert.ok(tokens[fg] && tokens[bg], `missing token for ${fg} or ${bg}`)
+      const r = ratio(tokens[fg], tokens[bg])
+      assert.ok(r >= min, `${fg} ${tokens[fg]} on ${bg} ${tokens[bg]} is ${r.toFixed(2)}:1, needs ${min}:1`)
     })
   }
-  test(`${themeName}: accent badge text on its 10% tint ≥ ${TEXT}:1`, () => {
-    const r = ratio(theme.accent, mix(theme.accent, theme.surface, 0.1))
+  test(`${name} / ${mode}: accent badge text on its 10% tint ≥ ${TEXT}:1`, () => {
+    const r = ratio(tokens.accent, mix(tokens.accent, tokens.surface, 0.1))
     assert.ok(r >= TEXT, `${r.toFixed(2)}:1`)
   })
 }
+
+test('the test itself found the palettes it is supposed to guard', () => {
+  assert.ok(paletteIds.length >= 5, `expected several palettes, found: ${paletteIds.join(', ') || 'none'}`)
+})
